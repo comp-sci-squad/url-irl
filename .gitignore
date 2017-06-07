@@ -7,3 +7,9 @@
 /build
 /captures
 .externalNativeBuild
+_mac
+IntelliLang.xml
+inspection
+debugger.xml
+diff.xml
+web-browser.xml
