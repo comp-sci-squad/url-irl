@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -19,6 +20,7 @@ import static org.junit.Assert.*;
  */
 
 public class ParserTest {
+
     @Test
     public void testParseUrls() throws Exception {
         Context appContext = InstrumentationRegistry.getTargetContext();
@@ -28,7 +30,7 @@ public class ParserTest {
                 "a d google.com d ", "a d www.hbbrennan.github.io", "https://reddit.org", "corn bread", "google.com/search?q=hi&ie=utf-8&oe=utf-8"));
         ArrayList<String> correctOutput =  new ArrayList<>(Arrays.asList(
                 "http://google.com", "http://www.hbbrennan.github.io", "https://reddit.org", "http://google.com/search?q=hi&ie=utf-8&oe=utf-8"));
-        ArrayList<Uri> output = Parser.parseURLs(test);
+        ArrayList<Uri> output = Parser.parseURLs(test, appContext);
 
         //First assert size then test each element like usual testing.
         assertEquals(output.size(), correctOutput.size());

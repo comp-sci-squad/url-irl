@@ -5,6 +5,7 @@ package comp_sci_squad.com.github.url_irl;
  */
 
 import android.content.res.Resources;
+import android.content.Context;
 import android.net.Uri;
 
 import java.util.ArrayList;
@@ -12,8 +13,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Parser {
-    private static final String url_regex = "\\b(?<![@.,%&#-])(\\w{2,10}:\\/\\/)?((?:\\w|\\&\\#\\d{3,5};)[.-]?)+\\.([a-z]{2,15})\\b(?![@])(\\/)?(?:([\\w\\d\\?\\-=#:%@&.;])+(?:\\/(?:([\\w\\d\\?\\-=#:%@&;.])+))*)?(?<![.,?!-])";
-
     /**
      *   Returns list of urls from a body of text.
      *
@@ -23,11 +22,11 @@ public class Parser {
      *   @param textBlocks the body of text to parse for urls.
      *   @return ArrayList<String> List of urls.
      */
-    public static ArrayList<Uri> parseURLs(ArrayList<String> textBlocks)
+    public static ArrayList<Uri> parseURLs(ArrayList<String> textBlocks, Context context)
     {
         ArrayList<Uri> urls = new ArrayList<>();
 
-        //String url_regex = Resources.getSystem().getString(R.string.url_regex);
+        String url_regex = context.getString(R.string.url_regex);
         Pattern urlPattern = Pattern.compile(url_regex);
 
         Matcher urlMatcher;
