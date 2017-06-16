@@ -5,6 +5,7 @@ package comp_sci_squad.com.github.url_irl;
  */
 
 import android.content.res.Resources;
+import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -19,20 +20,30 @@ public class Parser {
      *   As a precondition: a url in the text MUST have spaces before and after it.
      *   as URLs rules allow very diverse.
      *
-     *   @param text the body of text to parse for urls.
+     *   @param textBlocks the body of text to parse for urls.
      *   @return ArrayList<String> List of urls.
      */
-    public static ArrayList<String> parseURLs(String text)
+    public static ArrayList<Uri> parseURLs(ArrayList<String> textBlocks)
     {
-        ArrayList<String> urls = new ArrayList<>();
+        ArrayList<Uri> urls = new ArrayList<>();
 
         //String url_regex = Resources.getSystem().getString(R.string.url_regex);
         Pattern urlPattern = Pattern.compile(url_regex);
 
-        Matcher urlMatcher = urlPattern.matcher(text);
+        Matcher urlMatcher;
+        String temp;
 
-        while (urlMatcher.find())
-            urls.add(urlMatcher.group());
+        for (String text : textBlocks)
+        {
+            urlMatcher = urlPattern.matcher(text);
+            while (urlMatcher.find())
+            {
+                temp = urlMatcher.group();
+                if (!temp.startsWith("http://") && !temp.startsWith("https://"))
+                    temp = "http://" + temp;
+                urls.add(Uri.parse(temp));
+            }
+        }
 
         return urls;
     }
