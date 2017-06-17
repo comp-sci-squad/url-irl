@@ -7,12 +7,20 @@ package comp_sci_squad.com.github.url_irl;
 import android.content.res.Resources;
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Parser {
+public class UrlParseTask extends AsyncTask<String, Void, ArrayList<Uri>> {
+
+    @Override
+    protected void onPreExecute() {
+        //Start ShowURLs activity. Note should use ListAdapter
+    }
+
     /**
      *   Returns list of urls from a body of text.
      *
@@ -22,10 +30,9 @@ public class Parser {
      *   @param textBlocks the body of text to parse for urls.
      *   @return ArrayList<String> List of urls.
      */
-    public static ArrayList<Uri> parseURLs(ArrayList<String> textBlocks, Context context)
-    {
+    @Override
+    protected ArrayList<Uri> doInBackground(String... textBlocks) {
         ArrayList<Uri> urls = new ArrayList<>();
-
         String url_regex = context.getString(R.string.url_regex);
         Pattern urlPattern = Pattern.compile(url_regex);
 
@@ -45,5 +52,15 @@ public class Parser {
         }
 
         return urls;
+    }
+
+    @Override
+    protected void onPostExecute(ArrayList<Uri> uris) {
+        //Add uris to ListURLS  activity
+    }
+
+    @Override
+    protected void onProgressUpdate(Void... values) {
+        ///Add a URI Button to the ListURLS activity for the given URL
     }
 }
