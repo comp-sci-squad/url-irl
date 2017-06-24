@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,9 @@ public class UrlParseTask extends AsyncTask<String, Void, ArrayList<Uri>> {
 
     @Override
     protected void onPreExecute() {
-        //Start ShowURLs activity. Note should use ListAdapter
+        if (!isCancelled()) {
+            // TODO: 6/23/2017 Start loading bar/circle for updating list view
+        }
     }
 
     /**
@@ -33,15 +36,17 @@ public class UrlParseTask extends AsyncTask<String, Void, ArrayList<Uri>> {
     @Override
     protected ArrayList<Uri> doInBackground(String... textBlocks) {
         ArrayList<Uri> urls = new ArrayList<>();
+
+        // TODO: 6/23/2017 make class subclass of viewing activity. Will fix this.
         String url_regex = context.getString(R.string.url_regex);
         Pattern urlPattern = Pattern.compile(url_regex);
 
         Matcher urlMatcher;
         String temp;
 
-        for (String text : textBlocks)
+        for (int i = 0; i < textBlocks.length && !isCancelled(); i++)
         {
-            urlMatcher = urlPattern.matcher(text);
+            urlMatcher = urlPattern.matcher(textBlocks[i]);
             while (urlMatcher.find())
             {
                 temp = urlMatcher.group();
@@ -55,12 +60,12 @@ public class UrlParseTask extends AsyncTask<String, Void, ArrayList<Uri>> {
     }
 
     @Override
-    protected void onPostExecute(ArrayList<Uri> uris) {
-        //Add uris to ListURLS  activity
+    protected void onPostExecute(ArrayList<Uri> urls) {
+        // TODO: 6/23/2017 disable loading bar
+        // TODO: 6/23/2017 setListAdapter(new ArrayAdapter<Uri>(*.this, android.R.layout.*, urls);
+        // TODO: 6/23/2017 call notifyDataSetChanged();
+
     }
 
-    @Override
-    protected void onProgressUpdate(Void... values) {
-        ///Add a URI Button to the ListURLS activity for the given URL
-    }
+    // TODO: 6/23/2017 decide if onCancel needs to be overrided.
 }
