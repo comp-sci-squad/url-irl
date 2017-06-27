@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">url_irl</string>
+    <string name="app_name">My URLS</string>
     <string name="title_activity_list_urls">ListURLsActivity</string>
+    <string name="list_toast"> hello </string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 
