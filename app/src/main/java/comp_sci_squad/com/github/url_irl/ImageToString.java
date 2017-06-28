@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 package comp_sci_squad.com.github.url_irl;
 
@@ -69,4 +70,13 @@ public class ImageToString {
         arrayStrings = new String[inputString.size()];
         inputString.toArray(arrayStrings);
     }
+=======
+package comp_sci_squad.com.github.url_irl;
+
+/**
+ * Created by brentfred on 6/4/17.
+ */
+
+public class ImageToString {
+>>>>>>> ce9f02cb52f21439d231667a2ea0d100c19677d7
 }

@@ -10,6 +10,10 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+<<<<<<< HEAD
+=======
+        android:roundIcon="@mipmap/ic_launcher_round"
+>>>>>>> ce9f02cb52f21439d231667a2ea0d100c19677d7
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
@@ -17,10 +21,14 @@
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="ocr" />
 
+<<<<<<< HEAD
         <activity android:name=".MainActivity"
                   android:label="@string/title_activity_photo_viewer"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:screenOrientation="fullSensor">
+=======
+        <activity android:name=".MainActivity">
+>>>>>>> ce9f02cb52f21439d231667a2ea0d100c19677d7
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,12 +41,15 @@
             android:label="@string/title_activity_list_urls"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+<<<<<<< HEAD
         <activity android:name=".RetrieveList"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
         </activity>
+=======
+>>>>>>> ce9f02cb52f21439d231667a2ea0d100c19677d7
     </application>
 
 </manifest>

@@ -7,9 +7,12 @@
 /build
 /captures
 .externalNativeBuild
+<<<<<<< HEAD
 _mac
 IntelliLang.xml
 inspection
 debugger.xml
 diff.xml
 web-browser.xml
+=======
+>>>>>>> ce9f02cb52f21439d231667a2ea0d100c19677d7
