@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">url_irl</string>
     <string name="title_activity_list_urls">ListURLsActivity</string>
+    <string name="photo_prompt">Take a picture!</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 
