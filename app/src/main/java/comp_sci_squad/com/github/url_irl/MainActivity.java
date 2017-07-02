@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
         String[] allText = ImageToString.getTextFromPage(this,  bitmap);
 
         // Start the intent to get a List of Strings from the image
-        Intent i = new RetrieveList().newIntent(MainActivity.this, allText);
+        Intent i = new ListURLsActivity().newIntent(MainActivity.this, allText);
         startActivity(i);
     }
 }
