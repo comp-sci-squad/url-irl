@@ -91,11 +91,8 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
-<<<<<<< HEAD
     <string name="title_activity_photo_viewer">Photo Viewer</string>
     <string name="low_storage_error">Text detector dependencies cannot be downloaded due to low device storage</string>
     <string name="string_number_of_strings">Number of Strings in List: </string>
     <string name="strings_list">List: </string>
-=======
->>>>>>> ce9f02cb52f21439d231667a2ea0d100c19677d7
 </resources>
