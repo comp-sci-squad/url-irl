@@ -33,7 +33,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
         Intent sourceIntent = getIntent();
         if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST)))
-            mStringBlocks = getIntent().getStringArrayExtra(getString(R.string.URI_ARRAY_LIST));
+            mStringBlocks = sourceIntent.getStringArrayExtra(getString(R.string.URI_ARRAY_LIST));
 
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
