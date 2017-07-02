@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -19,7 +20,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
     // TODO: 6/23/17 to do title bar, menus
     // TODO: 6/23/17 do polish
-
 
     private UriAdapter mAdapter;
     private RecyclerView recyclerView;
@@ -111,6 +111,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         @Override
         protected void onPostExecute(ArrayList<Uri> urls) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
+            Toast.makeText(getApplicationContext(), "Loaded " + urls.size() + " URLS", Toast.LENGTH_SHORT);
             mAdapter.setArray(urls);
         }
 

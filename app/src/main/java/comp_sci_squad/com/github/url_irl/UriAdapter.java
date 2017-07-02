@@ -48,11 +48,6 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
         View view = inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately);
         UriViewHolder viewHolder = new UriViewHolder(view);
 
-        /*Context context2 = UriAdapter.this;
-        Toast.makeText(context2,
-                R.string.list_toast,
-                Toast.LENGTH_LONG).show(); */
-
         return viewHolder;
     }
 
