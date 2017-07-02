@@ -20,7 +20,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     // TODO: 6/23/17 to do title bar, menus
     // TODO: 6/23/17 do polish
 
-    private static final String URI_ARRAY_LIST = "comp_sci_squad.com.github.url_irl.uri_array_true";
 
     private UriAdapter mAdapter;
     private RecyclerView recyclerView;
@@ -33,8 +32,8 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         setContentView(R.layout.activity_list_urls);
 
         Intent sourceIntent = getIntent();
-        if (sourceIntent != null && sourceIntent.hasExtra(URI_ARRAY_LIST))
-            mStringBlocks = getIntent().getStringArrayExtra(URI_ARRAY_LIST);
+        if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST)))
+            mStringBlocks = getIntent().getStringArrayExtra(getString(R.string.URI_ARRAY_LIST));
 
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
@@ -52,7 +51,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
     public static Intent newIntent(Context packageContext, String[] stringList) {
         Intent i = new Intent(packageContext, ListURLsActivity.class);
-        i.putExtra(URI_ARRAY_LIST, stringList);
+        i.putExtra(packageContext.getString(R.string.URI_ARRAY_LIST), stringList);
 
         return i;
     }
