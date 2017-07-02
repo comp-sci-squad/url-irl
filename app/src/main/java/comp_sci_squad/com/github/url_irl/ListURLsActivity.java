@@ -24,7 +24,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
     private UriAdapter mAdapter;
     private RecyclerView recyclerView;
-    private ArrayList<String> mStringBlocks;
+    private String[] mStringBlocks;
     private ProgressBar mLoadingIndicator;
 
     @Override
@@ -32,7 +32,9 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_urls);
 
-        mStringBlocks = getIntent().getStringArrayListExtra(URI_ARRAY_LIST);
+        Intent sourceIntent = getIntent();
+        if (sourceIntent != null && sourceIntent.hasExtra(URI_ARRAY_LIST))
+            mStringBlocks = getIntent().getStringArrayExtra(URI_ARRAY_LIST);
 
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
@@ -45,10 +47,10 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         recyclerView.setAdapter(mAdapter);
 
         //Converts arraylist<string> to var args and runs the async task
-       new UrlParseTask().execute(mStringBlocks.toArray(new String[mStringBlocks.size()]));
+       new UrlParseTask().execute(mStringBlocks);
     }
 
-    public static Intent newIntent(Context packageContext, ArrayList<String> stringList) {
+    public static Intent newIntent(Context packageContext, String[] stringList) {
         Intent i = new Intent(packageContext, ListURLsActivity.class);
         i.putExtra(URI_ARRAY_LIST, stringList);
 
@@ -82,7 +84,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
          *   @param textBlocks the blocks of text to parse for urls.
          *   @return ArrayList<String> List of urls.
          */
-        @Override
+        @Override   
         protected ArrayList<Uri> doInBackground(String... textBlocks) {
             ArrayList<Uri> urls = new ArrayList<>();
 
