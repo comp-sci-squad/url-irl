@@ -95,7 +95,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
             for (int i = 0; i < textBlocks.length && !isCancelled(); i++)
             {
                 urlMatcher = urlPattern.matcher(textBlocks[i]);
-                while (urlMatcher.find())
+                while (urlMatcher.find() && !isCancelled())
                 {
                     temp = urlMatcher.group();
                     if (!temp.startsWith("http://") && !temp.startsWith("https://"))
