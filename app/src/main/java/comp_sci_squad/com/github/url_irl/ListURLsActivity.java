@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -20,7 +21,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
     // TODO: 6/23/17 to do title bar, menus
     // TODO: 6/23/17 do polish
-
+    private static final String TAG = "ListURLSActivity";
     private UriAdapter mAdapter;
     private RecyclerView recyclerView;
     private String[] mStringBlocks;
@@ -31,10 +32,13 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_urls);
 
+        Log.d(TAG, "On create Activity");
+
         Intent sourceIntent = getIntent();
         if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST)))
             mStringBlocks = sourceIntent.getStringArrayExtra(getString(R.string.URI_ARRAY_LIST));
 
+        Log.d(TAG, "Creating Recycler view, progress bar, layout manager, and URIADapter");
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
 
@@ -46,10 +50,13 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         recyclerView.setAdapter(mAdapter);
 
         //Converts arraylist<string> to var args and runs the async task
+        Log.d(TAG, "Starting UrlParseTask");
        new UrlParseTask().execute(mStringBlocks);
     }
 
     public static Intent newIntent(Context packageContext, String[] stringList) {
+        Log.d(TAG, "Getting Intent");
+
         Intent i = new Intent(packageContext, ListURLsActivity.class);
         i.putExtra(packageContext.getString(R.string.URI_ARRAY_LIST), stringList);
 
@@ -111,7 +118,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         @Override
         protected void onPostExecute(ArrayList<Uri> urls) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
-            Toast.makeText(getApplicationContext(), "Loaded " + urls.size() + " URLS", Toast.LENGTH_SHORT);
+            Toast.makeText(getApplicationContext(), "Loaded " + urls.size() + " URLS", Toast.LENGTH_SHORT).show();
             mAdapter.setArray(urls);
         }
 
