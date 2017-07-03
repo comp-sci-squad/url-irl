@@ -3,6 +3,7 @@ package comp_sci_squad.com.github.url_irl;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -46,6 +47,11 @@ public class MainActivity extends AppCompatActivity implements
                     Log.d(TAG, "Picture taken");
 
                     Bitmap image = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    String[] text = ImageToString.getTextFromPage(getApplicationContext(), image);
+                    Log.d(TAG, "Converted image to text: ");
+
+                    for (int i = 0; i < text.length; ++i)
+                        Log.v(TAG, text[i]);
                 }
             };
 
