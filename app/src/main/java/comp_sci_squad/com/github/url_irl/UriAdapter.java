@@ -56,7 +56,10 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
     }
 
     public int getItemCount() {
-        return uriArray.size();
+        if (uriArray != null)
+            return uriArray.size();
+        else
+            return 0;
     }
 
 
