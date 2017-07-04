@@ -1,9 +1,10 @@
 package comp_sci_squad.com.github.url_irl;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -13,13 +14,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageButton;
-
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.InputStream;
+
 import com.google.android.cameraview.CameraView;
 
-public class MainActivity extends AppCompatActivity implements
+public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
     private String TAG = "CAMERA_ACTIVITY";
     private static final int REQUEST_CAMERA_PERMISSION = 1;
@@ -52,6 +54,9 @@ public class MainActivity extends AppCompatActivity implements
 
                     for (int i = 0; i < text.length; ++i)
                         Log.v(TAG, text[i]);
+
+                    Intent i = ListURLsActivity.newIntent(MainActivity.this, text);
+                    startActivity(i);
                 }
             };
 
