@@ -1,5 +1,6 @@
 package comp_sci_squad.com.github.url_irl;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageButton;
 import android.util.Log;
@@ -75,8 +77,14 @@ public class MainActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mCamera = (CameraView)findViewById(R.id.camera);
-        mShutterButton = (ImageButton)findViewById(R.id.shutter_button);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new
+                    String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+        } else {
+            mCamera = (CameraView) findViewById(R.id.camera);
+            mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
+        }
 
         if (mCamera != null)
             mCamera.addCallback(mCameraCallback);
@@ -88,12 +96,14 @@ public class MainActivity extends Activity implements
     @Override
     protected void onResume() {
         super.onResume();
+        Log.v(TAG, "Camera Resuming");
         mCamera.start();
         Toast.makeText(this, R.string.camera_prompt, Toast.LENGTH_LONG).show();
     }
 
     @Override
     protected void onPause() {
+        Log.v(TAG, "Camera Paused");
         mCamera.stop();
         super.onPause();
     }
@@ -106,18 +116,20 @@ public class MainActivity extends Activity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        Log.d(TAG, "Permissions Requested");
         switch (requestCode) {
             case REQUEST_CAMERA_PERMISSION:
-                if (permissions.length != 1 || grantResults.length != 1) {
-                    Log.e(TAG, "Error With Camera Request");
-                    throw new RuntimeException("Error on requesting camera");
+                Log.d(TAG, "Permissions Result for Camera");
+                if (grantResults.length > 0 && grantResults[0]
+                        == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "Permission for camera granted");
+                    if (mCamera != null)
+                        mCamera.start();
+
+                } else {
+                    Log.d(TAG, "Permission for camera denied");
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
                 }
-                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "Permission Not Granted");
-                    Toast.makeText(this, R.string.need_permission, Toast.LENGTH_LONG);
-                }
-                Log.d(TAG, "Permission Granted");
                 break;
         }
     }
