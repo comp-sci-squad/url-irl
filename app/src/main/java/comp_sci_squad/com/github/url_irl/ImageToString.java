@@ -57,10 +57,13 @@ public class ImageToString {
     }
 
     private static void getStrings(SparseArray<TextBlock> tester) {
-        inputString = new ArrayList<String>();
+        inputString = new ArrayList<>();
 
-        for (int i = 0; i < tester.size(); i++)
+        Log.d(TAG, "Strings found:");
+        for (int i = 0; i < tester.size(); i++) {
+            Log.d(TAG, tester.valueAt(i).getValue());
             inputString.add(tester.valueAt(i).getValue());
+        }
 
         arrayStrings = new String[inputString.size()];
         inputString.toArray(arrayStrings);
