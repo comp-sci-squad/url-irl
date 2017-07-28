@@ -7,13 +7,17 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.view.Display;
+import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.util.Log;
 import android.widget.Toast;
@@ -51,7 +55,7 @@ public class MainActivity extends Activity implements
                     super.onPictureTaken(cameraView, data);
                     Log.d(TAG, "Picture taken");
 
-                    Bitmap image = BitmapFactory.decodeByteArray(data, 0, data.length);
+                    Bitmap image = rotatePictureByOrientation(data);
                     String[] text = ImageToString.getTextFromPage(getApplicationContext(), image);
                     Log.d(TAG, "Converted image to text: ");
 
@@ -142,5 +146,31 @@ public class MainActivity extends Activity implements
                 }
                 break;
         }
+    }
+
+    private Bitmap rotatePictureByOrientation(byte[] imageData) {
+        Display display = getWindowManager().getDefaultDisplay();
+        float rotationAmount = -90.0f; // Picture is sideways + camera rotation
+
+        switch (display.getRotation()) {
+            case Surface.ROTATION_0:
+            case Surface.ROTATION_180:
+                break;
+            case Surface.ROTATION_90:
+                rotationAmount += 90;
+                break;
+            case Surface.ROTATION_270:
+                rotationAmount += 270;
+                break;
+        }
+
+        Matrix rotationMatrix = new Matrix();
+        rotationMatrix.postRotate(rotationAmount);
+
+        Bitmap img = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(),
+                img.getHeight(), rotationMatrix, true);
+
+        return  rotatedImg;
     }
 }
