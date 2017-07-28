@@ -3,12 +3,15 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_id"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </android.support.v7.widget.RecyclerView>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/image_thumbnail"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        />
 
     <ProgressBar
         android:id="@+id/loading_indicator"
@@ -16,5 +19,12 @@
         android:visibility="invisible"
         android:layout_width="42dp"
         android:layout_height="42dp"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_id"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </android.support.v7.widget.RecyclerView>
 
 </FrameLayout>

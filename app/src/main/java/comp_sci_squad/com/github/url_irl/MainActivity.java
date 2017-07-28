@@ -2,10 +2,12 @@ package comp_sci_squad.com.github.url_irl;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,6 +20,9 @@ import android.widget.Toast;
 
 
 import com.google.android.cameraview.CameraView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 
 public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -53,7 +58,12 @@ public class MainActivity extends Activity implements
                     for (int i = 0; i < text.length; ++i)
                         Log.v(TAG, text[i]);
 
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    image.compress(Bitmap.CompressFormat.JPEG, 25, stream);
+                    byte[] compressedByteArray = stream.toByteArray();
+
                     Intent i = ListURLsActivity.newIntent(MainActivity.this, text);
+                    i.putExtra("bitmapBytes", compressedByteArray);
                     startActivity(i);
                 }
             };
