@@ -1,17 +1,7 @@
-<FrameLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/image_thumbnail"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        />
 
     <ProgressBar
         android:id="@+id/loading_indicator"
@@ -27,4 +17,15 @@
 
     </android.support.v7.widget.RecyclerView>
 
-</FrameLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/image_thumbnail"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:layout_alignBottom="@id/rv_id"
+        />
+
+</RelativeLayout>
