@@ -55,8 +55,10 @@ public class MainActivity extends Activity implements
                     super.onPictureTaken(cameraView, data);
                     Log.d(TAG, "Picture taken");
 
-                    Bitmap image = rotatePictureByOrientation(data);
+                    Display display = getWindowManager().getDefaultDisplay();
+                    Bitmap image = rotatePictureByOrientation(data, display.getRotation());
                     String[] text = ImageToString.getTextFromPage(getApplicationContext(), image);
+
                     Log.d(TAG, "Converted image to text: ");
 
                     for (int i = 0; i < text.length; ++i)
@@ -148,19 +150,26 @@ public class MainActivity extends Activity implements
         }
     }
 
-    private Bitmap rotatePictureByOrientation(byte[] imageData) {
-        Display display = getWindowManager().getDefaultDisplay();
-        float rotationAmount = -90.0f; // Picture is sideways + camera rotation
+    private Bitmap rotatePictureByOrientation(byte[] imageData, int rotation) {
+        float rotationAmount = 0; // Picture is sideways + camera rotation
 
-        switch (display.getRotation()) {
+        Log.d(TAG, "Rotation:");
+        switch (rotation) {
             case Surface.ROTATION_0:
-            case Surface.ROTATION_180:
+                Log.d(TAG, "0");
+                rotationAmount = 90;
                 break;
             case Surface.ROTATION_90:
-                rotationAmount += 90;
+                Log.d(TAG, "90");
+                rotationAmount = 0;
+                break;
+            case Surface.ROTATION_180:
+                Log.d(TAG, "180");
+                rotationAmount = -90;
                 break;
             case Surface.ROTATION_270:
-                rotationAmount += 270;
+                Log.d(TAG, "270");
+                rotationAmount = -180;
                 break;
         }
 
