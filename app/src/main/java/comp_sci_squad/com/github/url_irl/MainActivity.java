@@ -97,30 +97,36 @@ public class MainActivity extends Activity implements
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new
                     String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-        } else {
-            mCamera = (CameraView) findViewById(R.id.camera);
-            mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
-        }
+        } else
+            inflateViews();
+    }
 
-        if (mCamera != null)
-            mCamera.addCallback(mCameraCallback);
+    private void inflateViews() {
+        mCamera = (CameraView) findViewById(R.id.camera);
+        mCamera.addCallback(mCameraCallback);
 
-        if (mShutterButton != null)
-            mShutterButton.setOnClickListener(mOnClickListener);
+        mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
+        mShutterButton.setOnClickListener(mOnClickListener);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "Camera Resuming");
-        mCamera.start();
+
+        if (mCamera != null)
+            mCamera.start();
+
         Toast.makeText(this, R.string.camera_prompt, Toast.LENGTH_LONG).show();
     }
 
     @Override
     protected void onPause() {
         Log.v(TAG, "Camera Paused");
-        mCamera.stop();
+
+        if (mCamera != null)
+            mCamera.stop();
+
         super.onPause();
     }
 
@@ -135,12 +141,9 @@ public class MainActivity extends Activity implements
         switch (requestCode) {
             case REQUEST_CAMERA_PERMISSION:
                 Log.d(TAG, "Permissions Result for Camera");
-                if (grantResults.length > 0 && grantResults[0]
-                        == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "Permission for camera granted");
-                    if (mCamera != null)
-                        mCamera.start();
-
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "Request Successful");
+                    inflateViews();
                 } else {
                     Log.d(TAG, "Permission for camera denied");
                     ActivityCompat.requestPermissions(MainActivity.this,
@@ -177,9 +180,10 @@ public class MainActivity extends Activity implements
         rotationMatrix.postRotate(rotationAmount);
 
         Bitmap img = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(),
-                img.getHeight(), rotationMatrix, true);
 
-        return  rotatedImg;
+        img = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(),
+                rotationMatrix, true);
+
+        return  img;
     }
 }
