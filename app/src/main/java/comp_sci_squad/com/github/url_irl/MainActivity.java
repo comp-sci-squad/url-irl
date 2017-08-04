@@ -64,10 +64,9 @@ public class MainActivity extends Activity implements
                     for (int i = 0; i < text.length; ++i)
                         Log.v(TAG, text[i]);
 
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    image.compress(Bitmap.CompressFormat.JPEG, 25, stream);
-                    byte[] compressedByteArray = stream.toByteArray();
 
+                    byte[] compressedByteArray = compressBitmap(image);
+                    Log.d(TAG, "Passing byte array thumbnail image of size: " + compressedByteArray.length);
                     Intent i = ListURLsActivity.newIntent(MainActivity.this, text);
                     i.putExtra("bitmapBytes", compressedByteArray);
                     startActivity(i);
@@ -185,5 +184,11 @@ public class MainActivity extends Activity implements
                 rotationMatrix, true);
 
         return  img;
+    }
+
+    private byte[] compressBitmap(Bitmap image) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 9, stream);
+        return stream.toByteArray();
     }
 }
