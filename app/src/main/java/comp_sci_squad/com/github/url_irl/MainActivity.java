@@ -66,7 +66,6 @@ public class MainActivity extends Activity implements
 
 
                     byte[] compressedByteArray = compressBitmap(image);
-                    Log.d(TAG, "Passing byte array thumbnail image of size: " + compressedByteArray.length);
                     Intent i = ListURLsActivity.newIntent(MainActivity.this, text);
                     i.putExtra("bitmapBytes", compressedByteArray);
                     startActivity(i);
@@ -187,8 +186,11 @@ public class MainActivity extends Activity implements
     }
 
     private byte[] compressBitmap(Bitmap image) {
+        Log.d(TAG, "Compressing thumbnail Bitmap");
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 9, stream);
+        image.compress(Bitmap.CompressFormat.JPEG, 0, stream);
+        byte[] compressedByteArray = stream.toByteArray();
+        Log.d(TAG, "Passing byte array thumbnail image of size: " + compressedByteArray.length);
         return stream.toByteArray();
     }
 }
