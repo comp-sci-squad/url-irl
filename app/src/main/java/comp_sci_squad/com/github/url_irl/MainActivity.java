@@ -153,23 +153,21 @@ public class MainActivity extends Activity implements
 
     private Bitmap rotatePictureByOrientation(byte[] imageData, int rotation) {
         float rotationAmount = 0; // Picture is sideways + camera rotation
-
-        Log.d(TAG, "Rotation:");
         switch (rotation) {
             case Surface.ROTATION_0:
-                Log.d(TAG, "0");
+                Log.d(TAG, "Rotation: 0");
                 rotationAmount = 90;
                 break;
             case Surface.ROTATION_90:
-                Log.d(TAG, "90");
+                Log.d(TAG, "Rotation: 90");
                 rotationAmount = 0;
                 break;
             case Surface.ROTATION_180:
-                Log.d(TAG, "180");
+                Log.d(TAG, "Rotation: 180");
                 rotationAmount = -90;
                 break;
             case Surface.ROTATION_270:
-                Log.d(TAG, "270");
+                Log.d(TAG, "Rotation: 270");
                 rotationAmount = -180;
                 break;
         }
