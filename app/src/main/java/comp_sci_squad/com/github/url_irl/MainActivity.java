@@ -187,8 +187,9 @@ public class MainActivity extends Activity implements
 
     private byte[] compressBitmap(Bitmap image) {
         Log.d(TAG, "Compressing thumbnail Bitmap");
+        Bitmap scaled = Bitmap.createScaledBitmap(image, 640, 480, true);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 0, stream);
+        scaled.compress(Bitmap.CompressFormat.JPEG, 80, stream);
         byte[] compressedByteArray = stream.toByteArray();
         Log.d(TAG, "Passing byte array thumbnail image of size: " + compressedByteArray.length);
         return stream.toByteArray();
