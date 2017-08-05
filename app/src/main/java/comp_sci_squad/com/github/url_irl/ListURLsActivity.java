@@ -2,6 +2,7 @@ package comp_sci_squad.com.github.url_irl;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -26,21 +28,29 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     private RecyclerView recyclerView;
     private String[] mStringBlocks;
     private ProgressBar mLoadingIndicator;
+    private ImageView mImageView;
+    private byte[] urlScanImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_urls);
 
-        Log.d(TAG, "On create Activity");
+        Log.d(TAG, "On create " + TAG);
 
         Intent sourceIntent = getIntent();
-        if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST)))
+        if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST))) {
             mStringBlocks = sourceIntent.getStringArrayExtra(getString(R.string.URI_ARRAY_LIST));
+
+            urlScanImage = sourceIntent.getByteArrayExtra("bitmapBytes");
+        }
 
         Log.d(TAG, "Creating Recycler view, progress bar, layout manager, and URIADapter");
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
+
+        mImageView = (ImageView) findViewById(R.id.image_thumbnail);
+        mImageView.setImageBitmap(BitmapFactory.decodeByteArray(urlScanImage, 0, urlScanImage.length));
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
