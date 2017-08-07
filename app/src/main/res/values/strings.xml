@@ -1,11 +1,20 @@
 <resources>
+    //App stuff
+    <string name="title_activity_photo_viewer">URL IRL</string>
     <string name="app_name">My URLS</string>
     <string name="title_activity_list_urls">ListURLsActivity</string>
-    <string name="list_toast"> hello </string>
-    <string name="URI_ARRAY_LIST">comp_sci_squad.com.github.url_irl.uri_array_true</string>
+
+    //Cameraview Activity
+    <string name="photo_prompt">Take a picture!</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_photo_viewer">Photo Viewer</string>
+    <string name="camera_prompt">"Take a picture of a URL"</string>
+    <string name="need_permission">This app requires the camera to function. Please enable it under the permissions tab under settings.</string>
     <string name="low_storage_error">Text detector dependencies cannot be downloaded due to low device storage</string>
+    <string name="list_toast"> hello </string>
+
+    //List Urls Activity
+    <string name="URI_ARRAY_LIST">comp_sci_squad.com.github.url_irl.uri_array_true</string>
     <string name="string_number_of_strings">Number of Strings in List: </string>
     <string name="strings_list">List: </string>
+    <string name="list_urls_title">Scanned URLS:</string>
 </resources>

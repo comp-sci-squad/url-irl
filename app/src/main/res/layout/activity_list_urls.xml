@@ -1,20 +1,54 @@
-<FrameLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_id"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </android.support.v7.widget.RecyclerView>
 
     <ProgressBar
         android:id="@+id/loading_indicator"
         android:layout_gravity="center"
         android:visibility="invisible"
         android:layout_width="42dp"
-        android:layout_height="42dp"/>
+        android:layout_height="42dp" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/list_urls_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="@string/list_urls_title"
+        android:layout_alignParentTop="true"
+        android:padding="4dp"
+        />
+    <TextView
+        android:id="@+id/timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:layout_above="@+id/list_urls_title"
+        />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_id"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/image_thumbnail"
+        android:layout_below="@+id/timestamp"
+        >
+
+    </android.support.v7.widget.RecyclerView>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/image_thumbnail"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:layout_centerInParent="true"
+        android:padding="5dp"
+        android:layout_alignParentBottom="true"
+        />
+
+</RelativeLayout>
