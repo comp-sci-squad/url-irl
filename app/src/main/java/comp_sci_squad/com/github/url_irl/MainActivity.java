@@ -30,6 +30,12 @@ import java.io.FileOutputStream;
 
 public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
+    private final float[] OFFSET = {90.0f, 0.0f, -90.0f, -180.0f};
+    private final int INDEX_OFFSET_AT_0 = 0;
+    private final int INDEX_OFFSET_AT_90 = 1;
+    private final int INDEX_OFFSET_AT_180 = 2;
+    private final int INDEX_OFFSET_AT_270 = 3;
+
     private String TAG = "CAMERA_ACTIVITY";
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
@@ -152,23 +158,23 @@ public class MainActivity extends Activity implements
     }
 
     private Bitmap rotatePictureByOrientation(byte[] imageData, int rotation) {
-        float rotationAmount = 0; // Picture is sideways + camera rotation
+        float rotationAmount = 0.0f; // Picture is sideways + camera rotation
         switch (rotation) {
             case Surface.ROTATION_0:
                 Log.d(TAG, "Rotation: 0");
-                rotationAmount = 90;
+                rotationAmount = OFFSET[INDEX_OFFSET_AT_0];
                 break;
             case Surface.ROTATION_90:
                 Log.d(TAG, "Rotation: 90");
-                rotationAmount = 0;
+                rotationAmount = OFFSET[INDEX_OFFSET_AT_90];
                 break;
             case Surface.ROTATION_180:
                 Log.d(TAG, "Rotation: 180");
-                rotationAmount = -90;
+                rotationAmount = OFFSET[INDEX_OFFSET_AT_180];
                 break;
             case Surface.ROTATION_270:
                 Log.d(TAG, "Rotation: 270");
-                rotationAmount = -180;
+                rotationAmount = OFFSET[INDEX_OFFSET_AT_270];
                 break;
         }
 
