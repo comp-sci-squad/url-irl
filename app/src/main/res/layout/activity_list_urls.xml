@@ -38,6 +38,9 @@
 
     </android.support.v7.widget.RecyclerView>
 
+
+
+
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -49,6 +52,7 @@
         android:layout_centerInParent="true"
         android:padding="5dp"
         android:layout_alignParentBottom="true"
+        android:background="@drawable/shapes"
         />
 
 </RelativeLayout>
