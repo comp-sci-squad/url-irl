@@ -1,7 +1,7 @@
 <resources>
     //App stuff
-    <string name="title_activity_photo_viewer">URL IRL</string>
     <string name="app_name">My URLS</string>
+    <string name="title_activity_camera_viewer">URL IRL</string>
     <string name="title_activity_list_urls">ListURLsActivity</string>
 
     //Cameraview Activity
