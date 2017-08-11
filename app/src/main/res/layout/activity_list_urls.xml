@@ -32,9 +32,9 @@
         android:id="@+id/rv_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/image_thumbnail"
-        android:layout_below="@+id/timestamp"
-        >
+        android:layout_below="@+id/list_urls_title"
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/image_thumbnail">
 
     </android.support.v7.widget.RecyclerView>
 
