@@ -126,16 +126,17 @@ public class MainActivity extends Activity implements
 
     @Override
     protected void onPause() {
-        Log.v(TAG, "Camera Paused");
+        Log.v(TAG, "onPause()");
 
         if (mCamera != null)
             mCamera.stop();
-
+        Log.v(TAG, "Camera Paused");
         super.onPause();
     }
 
     @Override
     protected void onDestroy() {
+        Log.v(TAG, "onDestroy()");
         super.onDestroy();
     }
 
@@ -191,7 +192,10 @@ public class MainActivity extends Activity implements
 
     private byte[] compressBitmap(Bitmap image) {
         Log.d(TAG, "Compressing thumbnail Bitmap");
-        Bitmap scaled = Bitmap.createScaledBitmap(image, 640, 480, true);
+        int thumbnailHeight = image.getHeight()/8;
+        int thumbnailWidth = image.getWidth()/8;
+        
+        Bitmap scaled = Bitmap.createScaledBitmap(image, thumbnailWidth, thumbnailHeight, true);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         scaled.compress(Bitmap.CompressFormat.JPEG, 80, stream);
         byte[] compressedByteArray = stream.toByteArray();
