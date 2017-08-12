@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <shape xmlns:android="http://schemas.android.com/apk/res/android">
-        <solid android:color="#ABABAB" />
-        <stroke android:width="1dp" android:color="#000000" />
-        <padding android:left="5dp" android:top="5dp" android:right="5dp"
-            android:bottom="5dp" />
-    </shape>
-</selector>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/thumbnail_image_background_shape">
+    <padding android:left="8dp"
+        android:top="8dp"
+        android:right="8dp"
+        android:bottom="8dp" />
+    <solid android:color = "@color/white"/>
+</shape>
