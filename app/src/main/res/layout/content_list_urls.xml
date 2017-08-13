@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:padding="16dp">
+<android.support.constraint.ConstraintLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:padding="16dp">
 
     <TextView
         android:id="@+id/tv_id"
@@ -13,6 +14,25 @@
         android:layout_gravity="center_vertical|start"
         android:fontFamily="sans-serif-light"
         android:textSize="16sp"
-        tools:text="#42"
-        android:textColor="#000000" />
-</FrameLayout>
+        tools:text="https://stackoverflow.com/questions/41282947/android-constraint-layout-cuts-off-the-text-in-textview"
+        android:textColor="@android:color/black"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/shareButton"
+        app:layout_constraintBottom_toBottomOf="@+id/shareButton"
+        app:layout_constraintRight_toLeftOf="@+id/shareButton"
+        app:layout_constraintHorizontal_bias="0.0" />
+
+    <ImageButton
+        android:id="@+id/shareButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/share_background_circle"
+
+        app:srcCompat="?attr/actionModeShareDrawable"
+        android:layout_marginRight="8dp"
+        android:layout_gravity="center_vertical|end"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+</android.support.constraint.ConstraintLayout>
