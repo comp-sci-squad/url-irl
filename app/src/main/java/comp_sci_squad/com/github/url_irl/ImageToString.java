@@ -57,7 +57,6 @@ public class ImageToString {
             Log.d(TAG, tester.valueAt(i).getValue());
             inputString.add(tester.valueAt(i).getValue());
         }
-        String[] arrayStrings = new String[inputString.size()];
-        return inputString.toArray(arrayStrings);
+        return inputString.toArray(new String[inputString.size()]);
     }
 }
