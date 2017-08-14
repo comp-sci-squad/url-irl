@@ -7,9 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.net.URI;
 import java.util.ArrayList;
 
 /**
@@ -68,7 +66,7 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
 
         public UriViewHolder(View itemView) {
             super(itemView);
-            listItemView = (TextView) itemView.findViewById(R.id.tv_id);
+            listItemView = (TextView) itemView.findViewById(R.id.textViewUrl);
             itemView.setOnClickListener(this);
         }
 
