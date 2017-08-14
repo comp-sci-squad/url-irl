@@ -75,8 +75,18 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
     @Override
     public void onListItemClick(int clickedItemIndex) {
+        Log.d(TAG, "onListItemClick");
         Intent i = new Intent(Intent.ACTION_VIEW, mAdapter.getUri(clickedItemIndex));
         startActivity(i);
+    }
+
+    @Override
+    public void onShareButtonClick(int clickedItemIndex) {
+        Log.d(TAG, "onShareButtonClick");
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.setData(mAdapter.getUri(clickedItemIndex));
+        startActivity(shareIntent);
     }
 
     /**
