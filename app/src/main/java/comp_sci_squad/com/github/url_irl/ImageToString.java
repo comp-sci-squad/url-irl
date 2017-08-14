@@ -23,11 +23,6 @@ import java.util.ArrayList;
 
 public class ImageToString {
     private static final String TAG = "ImageToString";
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-
-    private static ArrayList<String> inputString;
-
-    private static String[] arrayStrings;
 
     public static String[] getTextFromPage(Context context, Bitmap bitmap) {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
@@ -51,21 +46,18 @@ public class ImageToString {
         // Although detector may be used multiple times for different images, it should be released
         // when it is no longer needed in order to free native resources.
         textRecognizer.release();
-        getStrings(textBlockSparseArray);
-
-        return arrayStrings;
+        return getStrings(textBlockSparseArray);
     }
 
-    private static void getStrings(SparseArray<TextBlock> tester) {
-        inputString = new ArrayList<>();
+    private static String[] getStrings(SparseArray<TextBlock> tester) {
+        ArrayList<String> inputString = new ArrayList<>();
 
         Log.d(TAG, "Strings found:");
         for (int i = 0; i < tester.size(); i++) {
             Log.d(TAG, tester.valueAt(i).getValue());
             inputString.add(tester.valueAt(i).getValue());
         }
-
-        arrayStrings = new String[inputString.size()];
-        inputString.toArray(arrayStrings);
+        String[] arrayStrings = new String[inputString.size()];
+        return inputString.toArray(arrayStrings);
     }
 }
