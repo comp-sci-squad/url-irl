@@ -15,7 +15,7 @@
         app:autoFocus="true"
         app:aspectRatio="4:3"
         app:facing="back"
-        app:flash="auto"/>
+        app:flash="off"/>
 
     <ImageButton
         android:id="@+id/shutter_button"
