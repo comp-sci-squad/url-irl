@@ -1,5 +1,6 @@
 package comp_sci_squad.com.github.url_irl;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
@@ -94,6 +95,15 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         //shareIntent.putExtra(Intent.EXTRA_SUBJECT, "R.string.sharing_url_subject");
         shareIntent.putExtra(Intent.EXTRA_TEXT, mAdapter.getUri(clickedItemIndex).toString());
         startActivity(shareIntent);
+    }
+
+    @Override
+    public void onSearchButtonClick(int clickedItemIndex) {
+        Log.d(TAG, "onSearchButtonClick");
+        Uri searchUri = Uri.parse(mAdapter.getUri(clickedItemIndex).getHost());
+        Intent searchIntent = new Intent(Intent.ACTION_WEB_SEARCH);
+        searchIntent.putExtra(SearchManager.QUERY, searchUri);
+        startActivity(searchIntent);
     }
 
     /**

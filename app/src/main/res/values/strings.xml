@@ -19,4 +19,5 @@
     <string name="list_urls_title">Scanned URLS:</string>
     <string name="sharing_url_subject">Sharing URL:</string>
     <string name="share_label">Share</string>
+    <string name="search_label">Search</string>
 </resources>

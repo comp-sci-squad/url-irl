@@ -22,6 +22,7 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
     public interface ListItemClickListener {
         void onListItemClick(int clickedItemIndex);
         void onShareButtonClick(int clickedItemIndex);
+        void onSearchButtonClick(int clickedItemIndex);
     }
 
     public UriAdapter(ListItemClickListener listener) {
@@ -66,24 +67,29 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
      class UriViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
          TextView listItemView;
          ImageButton shareButton;
+         ImageButton searchButton;
 
          public UriViewHolder(View itemView) {
              super(itemView);
              listItemView = (TextView) itemView.findViewById(R.id.textViewUrl);
              listItemView.setOnClickListener(this);
 
-             shareButton = (ImageButton) itemView.findViewById(R.id.shareButton);
+             shareButton = (ImageButton) itemView.findViewById(R.id.share_button);
              shareButton.setOnClickListener(this);
+
+             searchButton = (ImageButton) itemView.findViewById(R.id.search_button);
+             searchButton.setOnClickListener(this);
          }
 
          @Override
           public void onClick(View v) {
              int clickedPosition = getAdapterPosition();
-             if (v instanceof TextView)
+             if (v.getId() == R.id.textViewUrl)
                 mOnClickListener.onListItemClick(clickedPosition);
-
-             if (v instanceof ImageButton)
+             else if (v.getId() == R.id.share_button)
                  mOnClickListener.onShareButtonClick(clickedPosition);
+             else if (v.getId() == R.id.search_button)
+                 mOnClickListener.onSearchButtonClick(clickedPosition);
          }
      }
 }
