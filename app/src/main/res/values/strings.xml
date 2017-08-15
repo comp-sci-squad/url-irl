@@ -7,7 +7,7 @@
     //Cameraview Activity
     <string name="photo_prompt">Take a picture!</string>
     <string name="action_settings">Settings</string>
-    <string name="camera_prompt">"Take a picture of a URL"</string>
+    <string name="camera_prompt">"Take a picture of a website address"</string>
     <string name="need_permission">This app requires the camera to function. Please enable it under the permissions tab under settings.</string>
     <string name="low_storage_error">Text detector dependencies cannot be downloaded due to low device storage</string>
     <string name="list_toast"> hello </string>
@@ -17,4 +17,5 @@
     <string name="string_number_of_strings">Number of Strings in List: </string>
     <string name="strings_list">List: </string>
     <string name="list_urls_title">Scanned URLS:</string>
+    <string name="sharing_url_subject">Sharing URL:</string>
 </resources>
