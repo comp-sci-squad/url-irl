@@ -23,8 +23,6 @@ import java.util.regex.Pattern;
 
 public class ListURLsActivity extends AppCompatActivity implements UriAdapter.ListItemClickListener {
 
-    // TODO: 6/23/17 to do title bar, menus
-    // TODO: 6/23/17 do polish
     private static final String TAG = "ListURLSActivity";
     private UriAdapter mAdapter;
     private RecyclerView recyclerView;
@@ -158,8 +156,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
             Toast.makeText(getApplicationContext(), "Loaded " + urls.size() + " URLS", Toast.LENGTH_SHORT).show();
             mAdapter.setArray(urls);
         }
-
-        // TODO: 6/23/2017 decide if onCancel needs to be overrided.
     }
 
 }
