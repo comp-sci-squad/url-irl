@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,6 +28,7 @@ import com.google.android.cameraview.CameraView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 
 public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -97,12 +99,25 @@ public class MainActivity extends Activity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new
-                    String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-        } else
-            inflateViews();
+        if(!Build.FINGERPRINT.startsWith("generic")) {
+            InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
+            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+
+            String[] allText = ImageToString.getTextFromPage(this, bitmap);
+
+            // Start the intent to get a List of Strings from the image
+            Intent i = ListURLsActivity.newIntent(MainActivity.this, allText);
+            startActivity(i);
+        }// if program was ran on an emulator
+        else {
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(MainActivity.this, new
+                        String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+            } else
+                inflateViews();
+        }// if program isn't ran on an emulator
     }
 
     private void inflateViews() {
