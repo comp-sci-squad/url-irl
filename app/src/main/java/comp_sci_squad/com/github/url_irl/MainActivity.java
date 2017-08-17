@@ -95,11 +95,22 @@ public class MainActivity extends Activity implements
 
             };
 
+    public static boolean isEmulator() {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk".equals(Build.PRODUCT);
+    }
+
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(!Build.FINGERPRINT.startsWith("generic")) {
+        if(isEmulator()) {
             InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
 

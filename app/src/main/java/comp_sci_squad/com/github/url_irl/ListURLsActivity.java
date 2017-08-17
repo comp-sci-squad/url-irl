@@ -55,7 +55,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
 
-        if(Build.FINGERPRINT.startsWith("generic")) {
+        if(!MainActivity.isEmulator()) {
             mImageView = (ImageView) findViewById(R.id.image_thumbnail);
             mImageView.setImageBitmap(BitmapFactory.decodeByteArray(urlScanImage, 0, urlScanImage.length));
         }// if program was not ran on an emulator
