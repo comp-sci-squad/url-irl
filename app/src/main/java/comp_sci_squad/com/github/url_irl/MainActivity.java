@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,7 +17,6 @@ import android.support.v4.content.ContextCompat;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.util.Log;
 import android.widget.Toast;
@@ -27,7 +25,6 @@ import android.widget.Toast;
 import com.google.android.cameraview.CameraView;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -64,39 +61,66 @@ public class MainActivity extends Activity implements
                     super.onPictureTaken(cameraView, data);
                     Log.d(TAG, "Picture taken");
 
+                    mShutterButton.removeCallbacks(null);
+
                     Display display = getWindowManager().getDefaultDisplay();
                     Bitmap image = rotatePictureByOrientation(data, display.getRotation());
-                    ArrayList<String> text = ImageToString.getTextFromPage(getApplicationContext(), image);
 
-                    Log.d(TAG, "Converted image to text: ");
-
-                    for (int i = 0; i < text.size(); ++i)
-                        Log.v(TAG, text.get(i));
-
-
-                    byte[] compressedByteArray = compressBitmap(image);
-                    Intent i = ListURLsActivity.newIntent(MainActivity.this, text);
-                    i.putExtra("bitmapBytes", compressedByteArray);
-                    startActivity(i);
+                    TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this);
+                    parsingTask.execute(image);
                 }
             };
 
-    private View.OnClickListener mOnClickListener =
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    switch (v.getId()) {
-                        case R.id.shutter_button:
-                            if (mCamera != null)
-                                Log.d(TAG, "Shutter Button Pressed");
-                                mCamera.takePicture();
-                            break;
+    protected class TextRecognitionTask extends AsyncTask<Bitmap, Integer, Intent> {
+        private Context mContext;
+
+        public TextRecognitionTask(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        protected Intent doInBackground(Bitmap... params) {
+            Log.d(TAG, "URL Parsing Task Started");
+            ArrayList<String> result = new ArrayList<>();
+            byte[] compressedImage = null;
+
+            for (Bitmap image : params) {
+                Log.d(TAG, "Converted image to text: ");
+
+                result.addAll(ImageToString.getTextFromPage(mContext, image));
+                compressedImage = compressBitmap(image);
+            }
+
+            Intent intent = ListURLsActivity.newIntent(mContext, result);
+            intent.putExtra("bitmapBytes", compressedImage);
+
+            return intent;
+        }
+
+        @Override
+        protected void onPostExecute(Intent intent) {
+            Log.d(TAG, "URL Parsing Task Ended.");
+            startActivity(intent);
+        }
+    }
+
+    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.shutter_button:
+                    if (mCamera != null) {
+                        Log.d(TAG, "Shutter Button Pressed");
+                        mCamera.takePicture();
                     }
-                }
-
-            };
+                    break;
+            }
+        }
+    };
 
     public static boolean isEmulator() {
+        return false;
+        /*
         return Build.FINGERPRINT.startsWith("generic")
                 || Build.FINGERPRINT.startsWith("unknown")
                 || Build.MODEL.contains("google_sdk")
@@ -104,7 +128,7 @@ public class MainActivity extends Activity implements
                 || Build.MODEL.contains("Android SDK built for x86")
                 || Build.MANUFACTURER.contains("Genymotion")
                 || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-                || "google_sdk".equals(Build.PRODUCT);
+                || "google_sdk".equals(Build.PRODUCT);*/
     }
 
     public void onCreate(@Nullable Bundle savedInstanceState) {

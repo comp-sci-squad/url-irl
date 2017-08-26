@@ -1,5 +1,3 @@
-
-
 package comp_sci_squad.com.github.url_irl;
 
 import android.content.Context;
