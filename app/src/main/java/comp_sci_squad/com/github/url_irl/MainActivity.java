@@ -61,7 +61,7 @@ public class MainActivity extends Activity implements
                     super.onPictureTaken(cameraView, data);
                     Log.d(TAG, "Picture taken");
 
-                    mShutterButton.removeCallbacks(null);
+                    mShutterButton.setOnClickListener(null);
 
                     Display display = getWindowManager().getDefaultDisplay();
                     Bitmap image = rotatePictureByOrientation(data, display.getRotation());
