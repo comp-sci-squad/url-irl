@@ -29,6 +29,7 @@ import com.google.android.cameraview.CameraView;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -65,12 +66,12 @@ public class MainActivity extends Activity implements
 
                     Display display = getWindowManager().getDefaultDisplay();
                     Bitmap image = rotatePictureByOrientation(data, display.getRotation());
-                    String[] text = ImageToString.getTextFromPage(getApplicationContext(), image);
+                    ArrayList<String> text = ImageToString.getTextFromPage(getApplicationContext(), image);
 
                     Log.d(TAG, "Converted image to text: ");
 
-                    for (int i = 0; i < text.length; ++i)
-                        Log.v(TAG, text[i]);
+                    for (int i = 0; i < text.size(); ++i)
+                        Log.v(TAG, text.get(i));
 
 
                     byte[] compressedByteArray = compressBitmap(image);
@@ -114,12 +115,12 @@ public class MainActivity extends Activity implements
             InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
-            String[] allText = ImageToString.getTextFromPage(this, bitmap);
+            ArrayList<String> allText = ImageToString.getTextFromPage(this, bitmap);
 
             // Start the intent to get a List of Strings from the image
             Intent i = ListURLsActivity.newIntent(MainActivity.this, allText);
             startActivity(i);
-        }// if program was ran on an emulator
+        } // if program was ran on an emulator
         else {
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -128,7 +129,7 @@ public class MainActivity extends Activity implements
                         String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
             } else
                 inflateViews();
-        }// if program isn't ran on an emulator
+        }
     }
 
     private void inflateViews() {
