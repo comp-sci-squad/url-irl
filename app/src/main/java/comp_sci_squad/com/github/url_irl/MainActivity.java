@@ -108,6 +108,7 @@ public class MainActivity extends Activity implements
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
 
         if(isEmulator()) {
@@ -142,10 +143,11 @@ public class MainActivity extends Activity implements
     @Override
     protected void onResume() {
         super.onResume();
-        Log.v(TAG, "Camera Resuming");
+        Log.v(TAG, "onResume()");
 
         if (mCamera != null)
             mCamera.start();
+        Log.v(TAG, "Camera Resumed");
 
         Toast.makeText(this, R.string.camera_prompt, Toast.LENGTH_LONG).show();
     }
