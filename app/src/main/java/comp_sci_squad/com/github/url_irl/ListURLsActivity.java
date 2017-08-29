@@ -16,11 +16,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import comp_sci_squad.com.github.url_irl.utilities.FormattingUtils;
 
 public class ListURLsActivity extends AppCompatActivity implements UriAdapter.ListItemClickListener {
 
@@ -32,6 +36,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     private ImageView mImageView;
     private byte[] urlScanImage;
     private Toolbar mToolBar;
+    private TextView mTimestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,17 +48,20 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
 
         Log.d(TAG, "On create " + TAG);
-
+        long timePictureTaken = 0;
         Intent sourceIntent = getIntent();
         if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST))) {
             mStringBlocks = sourceIntent.getStringArrayExtra(getString(R.string.URI_ARRAY_LIST));
 
-            urlScanImage = sourceIntent.getByteArrayExtra("bitmapBytes");
+            urlScanImage = sourceIntent.getByteArrayExtra(MainActivity.PICTURE_EXTRA);
+            timePictureTaken = sourceIntent.getLongExtra(MainActivity.TIME_EXTRA, 0);
         }
 
         Log.d(TAG, "Creating Recycler view, progress bar, layout manager, and URIADapter");
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
+        mTimestamp = (TextView) findViewById(R.id.timestamp);
+        mTimestamp.setText(FormattingUtils.formatTimeStamp(timePictureTaken, getString(R.string.timestamp_format_pattern)));
 
         if(!MainActivity.isEmulator()) {
             mImageView = (ImageView) findViewById(R.id.image_thumbnail);

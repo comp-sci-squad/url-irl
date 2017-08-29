@@ -29,9 +29,13 @@ import com.google.android.cameraview.CameraView;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 
 public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
+    public static final String PICTURE_EXTRA = "bitmapBytes";
+    public static final String TIME_EXTRA = "time";
+
     private final float[] OFFSET = {90.0f, 0.0f, -90.0f, -180.0f};
     private final int INDEX_OFFSET_AT_0 = 0;
     private final int INDEX_OFFSET_AT_90 = 1;
@@ -65,6 +69,7 @@ public class MainActivity extends Activity implements
 
                     Display display = getWindowManager().getDefaultDisplay();
                     Bitmap image = rotatePictureByOrientation(data, display.getRotation());
+                    long timePictureTaken = System.currentTimeMillis();
                     String[] text = ImageToString.getTextFromPage(getApplicationContext(), image);
 
                     Log.d(TAG, "Converted image to text: ");
@@ -75,7 +80,8 @@ public class MainActivity extends Activity implements
 
                     byte[] compressedByteArray = compressBitmap(image);
                     Intent i = ListURLsActivity.newIntent(MainActivity.this, text);
-                    i.putExtra("bitmapBytes", compressedByteArray);
+                    i.putExtra(PICTURE_EXTRA, compressedByteArray);
+                    i.putExtra(TIME_EXTRA, timePictureTaken);
                     startActivity(i);
                 }
             };
