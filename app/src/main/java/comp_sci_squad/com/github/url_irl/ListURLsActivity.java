@@ -100,7 +100,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         shareIntent.setType("text/plain");
         //shareIntent.putExtra(Intent.EXTRA_SUBJECT, "R.string.sharing_url_subject");
         shareIntent.putExtra(Intent.EXTRA_TEXT, mAdapter.getUri(clickedItemIndex).toString());
-        startActivity(shareIntent);
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_label)));
     }
 
     @Override
