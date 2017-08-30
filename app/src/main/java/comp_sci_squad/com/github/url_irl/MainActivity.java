@@ -2,13 +2,11 @@ package comp_sci_squad.com.github.url_irl;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,18 +16,13 @@ import android.support.v4.content.ContextCompat;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.util.Log;
 import android.widget.Toast;
 
-
 import com.google.android.cameraview.CameraView;
-
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 
 public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
