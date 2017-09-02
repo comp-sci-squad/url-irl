@@ -43,7 +43,7 @@ public class MainActivity extends Activity implements
     private CameraView mCamera;
     private ImageButton mShutterButton;
     private MyOrientationEventListener mOrientationEventListener;
-    private int mLastOrientation;
+    private int mLastOrientation = 0;
 
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
@@ -99,7 +99,14 @@ public class MainActivity extends Activity implements
         };
 
     public void onOrientationChanged(int orientation) {
-        
+        int diff = mLastOrientation * 90 - orientation;
+        int alt = 360 - diff;
+        diff = Math.min(diff, alt);
+        if (diff > 55) {
+            mLastOrientation = Math.round(orientation/90.0f);
+            Log.d(TAG, "Orientation Changed to: " + mLastOrientation);
+
+        }
     }
 
     public static boolean isEmulator() {
@@ -119,7 +126,6 @@ public class MainActivity extends Activity implements
         setContentView(R.layout.activity_main);
 
         mOrientationEventListener = new MyOrientationEventListener(this);
-        mLastOrientation = getWindowManager().getDefaultDisplay().getRotation();
 
         if(isEmulator()) {
             InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
@@ -256,8 +262,7 @@ public class MainActivity extends Activity implements
         @Override
         public void onOrientationChanged(int orientation) {
             if (orientation != MyOrientationEventListener.ORIENTATION_UNKNOWN) {
-                Log.v("Orientation", Integer.toString(orientation));
-                Log.v("Window Rotation", Integer.toString(getWindowManager().getDefaultDisplay().getRotation()));
+                //Log.v("Orientation", Integer.toString(orientation));
                 MainActivity.this.onOrientationChanged(orientation);
             }
         }
