@@ -31,7 +31,7 @@ public class MainActivity extends Activity implements
     public static final String PICTURE_EXTRA = "bitmapBytes";
     public static final String TIME_EXTRA = "time";
 
-    private final float[] OFFSET = {90.0f, 0.0f, -90.0f, -180.0f};
+    private final float[] OFFSET = {90.0f, 180.0f, -90.0f, 0.0f};
     private final int INDEX_OFFSET_AT_0 = 0;
     private final int INDEX_OFFSET_AT_90 = 1;
     private final int INDEX_OFFSET_AT_180 = 2;
@@ -64,8 +64,7 @@ public class MainActivity extends Activity implements
                     super.onPictureTaken(cameraView, data);
                     Log.d(TAG, "Picture taken");
 
-                    Display display = getWindowManager().getDefaultDisplay();
-                    Bitmap image = rotatePictureByOrientation(data, display.getRotation());
+                    Bitmap image = rotatePictureByOrientation(data, mLastOrientation);
                     long timePictureTaken = System.currentTimeMillis();
                     String[] text = ImageToString.getTextFromPage(getApplicationContext(), image);
 
@@ -99,11 +98,10 @@ public class MainActivity extends Activity implements
         };
 
     public void onOrientationChanged(int orientation) {
-        int diff = mLastOrientation * 90 - orientation;
-        int alt = 360 - diff;
-        diff = Math.min(diff, alt);
+        int diff = Math.abs(mLastOrientation * 90 - orientation);
+        diff = Math.min(diff, 360 - diff);
         if (diff > 55) {
-            mLastOrientation = Math.round(orientation/90.0f);
+            mLastOrientation = Math.round(orientation/90.0f) % 4;
             Log.d(TAG, "Orientation Changed to: " + mLastOrientation);
 
         }
