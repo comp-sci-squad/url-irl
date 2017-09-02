@@ -2,6 +2,7 @@ package comp_sci_squad.com.github.url_irl;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -14,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.Display;
+import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
 import android.widget.ImageButton;
@@ -40,6 +42,8 @@ public class MainActivity extends Activity implements
 
     private CameraView mCamera;
     private ImageButton mShutterButton;
+    private MyOrientationEventListener mOrientationEventListener;
+    private int mLastOrientation;
 
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
@@ -80,19 +84,23 @@ public class MainActivity extends Activity implements
             };
 
     private View.OnClickListener mOnClickListener =
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    switch (v.getId()) {
-                        case R.id.shutter_button:
-                            if (mCamera != null)
-                                Log.d(TAG, "Shutter Button Pressed");
-                                mCamera.takePicture();
-                            break;
-                    }
+        new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.shutter_button:
+                        if (mCamera != null)
+                            Log.d(TAG, "Shutter Button Pressed");
+                            mCamera.takePicture();
+                        break;
                 }
+            }
 
-            };
+        };
+
+    public void onOrientationChanged(int orientation) {
+        
+    }
 
     public static boolean isEmulator() {
         return Build.FINGERPRINT.startsWith("generic")
@@ -109,6 +117,9 @@ public class MainActivity extends Activity implements
         super.onCreate(savedInstanceState);
         Log.v(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
+
+        mOrientationEventListener = new MyOrientationEventListener(this);
+        mLastOrientation = getWindowManager().getDefaultDisplay().getRotation();
 
         if(isEmulator()) {
             InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
@@ -143,7 +154,12 @@ public class MainActivity extends Activity implements
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "onResume()");
-
+        if (mOrientationEventListener.canDetectOrientation()) {
+            Log.v(TAG, "Orientation Event Listener can detect orientation");
+            mOrientationEventListener.enable();
+        } else {
+            Log.d(TAG, "Orientation Event Listener cannot detect orientation");
+        }
         if (mCamera != null)
             mCamera.start();
         Log.v(TAG, "Camera Resumed");
@@ -154,7 +170,7 @@ public class MainActivity extends Activity implements
     @Override
     protected void onPause() {
         Log.v(TAG, "onPause()");
-
+        mOrientationEventListener.disable();
         if (mCamera != null)
             mCamera.stop();
         Log.v(TAG, "Camera Paused");
@@ -228,5 +244,22 @@ public class MainActivity extends Activity implements
         byte[] compressedByteArray = stream.toByteArray();
         Log.d(TAG, "Passing byte array thumbnail image of size: " + compressedByteArray.length);
         return stream.toByteArray();
+    }
+
+
+    private class MyOrientationEventListener
+            extends OrientationEventListener {
+        public MyOrientationEventListener(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onOrientationChanged(int orientation) {
+            if (orientation != MyOrientationEventListener.ORIENTATION_UNKNOWN) {
+                Log.v("Orientation", Integer.toString(orientation));
+                Log.v("Window Rotation", Integer.toString(getWindowManager().getDefaultDisplay().getRotation()));
+                MainActivity.this.onOrientationChanged(orientation);
+            }
+        }
     }
 }
