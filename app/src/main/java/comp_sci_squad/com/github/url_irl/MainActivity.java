@@ -14,10 +14,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.view.Display;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.util.Log;
 import android.widget.Toast;
@@ -101,7 +103,15 @@ public class MainActivity extends Activity implements
         int diff = Math.abs(mLastOrientation * 90 - orientation);
         diff = Math.min(diff, 360 - diff);
         if (diff > 55) {
-            mLastOrientation = Math.round(orientation/90.0f) % 4;
+            int newOrientation = Math.round(orientation/90.0f) % 4;
+            RotateAnimation rotate = new RotateAnimation(0.0f, 90.0f,
+                    RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+                    RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+            rotate.setFillAfter(true);
+
+            mShutterButton.startAnimation(rotate);
+            mShutterButton.setRotation(newOrientation * 90.0f);
+            mLastOrientation = newOrientation;
             Log.d(TAG, "Orientation Changed to: " + mLastOrientation);
 
         }
