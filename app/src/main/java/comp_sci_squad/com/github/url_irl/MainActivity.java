@@ -13,14 +13,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.widget.ImageButton;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.cameraview.CameraView;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
@@ -30,16 +31,16 @@ public class MainActivity extends Activity implements
     public static final String TIME_EXTRA = "time";
 
     private final float[] OFFSET = {90.0f, 0.0f, -90.0f, -180.0f};
-    private final int INDEX_OFFSET_AT_0 = 0;
-    private final int INDEX_OFFSET_AT_90 = 1;
-    private final int INDEX_OFFSET_AT_180 = 2;
-    private final int INDEX_OFFSET_AT_270 = 3;
+    final int INDEX_OFFSET_AT_0 = 0;
+    final int INDEX_OFFSET_AT_90 = 1;
+    final int INDEX_OFFSET_AT_180 = 2;
+    final int INDEX_OFFSET_AT_270 = 3;
 
     private String TAG = "CAMERA_ACTIVITY";
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
     private CameraView mCamera;
-    private ImageButton mShutterButton;
+    ImageButton mShutterButton;
 
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
@@ -63,16 +64,16 @@ public class MainActivity extends Activity implements
                     Display display = getWindowManager().getDefaultDisplay();
                     Bitmap image = rotatePictureByOrientation(data, display.getRotation());
                     long timePictureTaken = System.currentTimeMillis();
-                    String[] text = ImageToString.getTextFromPage(getApplicationContext(), image);
+                    String[] textArr = ImageToString.getTextFromPage(getApplicationContext(), image);
 
                     Log.d(TAG, "Converted image to text: ");
 
-                    for (int i = 0; i < text.length; ++i)
-                        Log.v(TAG, text[i]);
+                    for (String text : textArr)
+                        Log.v(TAG, text);
 
 
                     byte[] compressedByteArray = compressBitmap(image);
-                    Intent i = ListURLsActivity.newIntent(MainActivity.this, text);
+                    Intent i = ListURLsActivity.newIntent(MainActivity.this, textArr);
                     i.putExtra(PICTURE_EXTRA, compressedByteArray);
                     i.putExtra(TIME_EXTRA, timePictureTaken);
                     startActivity(i);
@@ -85,9 +86,10 @@ public class MainActivity extends Activity implements
                 public void onClick(View v) {
                     switch (v.getId()) {
                         case R.id.shutter_button:
-                            if (mCamera != null)
+                            if (mCamera != null) {
                                 Log.d(TAG, "Shutter Button Pressed");
                                 mCamera.takePicture();
+                            }
                             break;
                     }
                 }
