@@ -107,7 +107,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     public void onSearchButtonClick(int clickedItemIndex) {
         Log.d(TAG, "onSearchButtonClick");
         String googleSearchUrl = "https://www.google.com/search?q=";
-        Uri searchUri = Uri.parse("https://www.google.com/search?q=" + mAdapter.getUri(clickedItemIndex).getHost());
+        Uri searchUri = Uri.parse(googleSearchUrl + mAdapter.getUri(clickedItemIndex).getHost());
         Intent searchIntent = new Intent(Intent.ACTION_VIEW, searchUri);
         startActivity(searchIntent);
     }

@@ -25,7 +25,8 @@
         tools:layout_constraintTop_creator="1"
         tools:layout_constraintRight_creator="1"
         tools:layout_constraintLeft_creator="1"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="161dp" />
 
     <TextView
         android:id="@+id/text_view_share_button"
