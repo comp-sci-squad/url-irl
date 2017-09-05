@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    #Theme
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorBackground">#ececec</color>
     <color name="colorPrimaryLight">#2da3d2</color>
+
+    #Touch Selectors
+    <color name="url_selected">#E0E0E0</color>
+    <color name="url_background">@android:color/white</color>
 </resources>
