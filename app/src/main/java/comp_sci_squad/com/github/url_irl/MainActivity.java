@@ -120,6 +120,8 @@ public class MainActivity extends Activity implements
 
             // Start the intent to get a List of Strings from the image
             Intent i = ListURLsActivity.newIntent(MainActivity.this, allText);
+            i.putExtra(PICTURE_EXTRA, compressBitmap(bitmap));
+            i.putExtra(TIME_EXTRA, System.currentTimeMillis());
             startActivity(i);
         }// if program was ran on an emulator
         else {
