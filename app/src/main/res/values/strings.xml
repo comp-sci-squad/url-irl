@@ -6,7 +6,7 @@
 
     //Cameraview Activity
     <string name="photo_prompt">Take a picture!</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Share all URLs</string>
     <string name="camera_prompt">"Take a picture of a website address"</string>
     <string name="need_permission">This app requires the camera to function. Please enable it under the permissions tab under settings.</string>
     <string name="low_storage_error">Text detector dependencies cannot be downloaded due to low device storage</string>
