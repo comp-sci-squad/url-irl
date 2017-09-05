@@ -101,7 +101,10 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         switch (item.getItemId()) {
             case R.id.share_all:
                 // Share the URLS
-                startActivity(Intent.createChooser(shareIntent, "Share using"));
+                if (shareIntent != null)
+                    startActivity(Intent.createChooser(shareIntent, "Share using"));
+                else
+                    Log.e(TAG, "Share intent was null");
                 return true;
 
             default:
@@ -199,7 +202,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
             // Share intent
             String shareString = "";
             for (Uri uri : urls)
-                shareString += uri.toString() + " ";
+                shareString += uri.toString() + "\n";
             shareIntent = new Intent();
             shareIntent.setAction(Intent.ACTION_SEND);
             shareIntent.putExtra(Intent.EXTRA_TEXT, shareString);
