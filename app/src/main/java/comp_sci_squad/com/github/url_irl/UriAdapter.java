@@ -18,12 +18,6 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
 
     final private ListItemClickListener mOnClickListener;
     private ArrayList<Uri> uriArray;
-    public interface ListItemClickListener {
-        void onListItemClick(int clickedItemIndex);
-        void onShareButtonClick(int clickedItemIndex);
-        void onSearchButtonClick(int clickedItemIndex);
-    }
-
     public UriAdapter(ListItemClickListener listener) {
         mOnClickListener = listener;
     }
@@ -52,7 +46,9 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
     }
 
     public void onBindViewHolder(UriViewHolder holder, int position) {
-        holder.listItemView.setText(uriArray.get(position).toString());
+        Uri u = uriArray.get(position);
+        String text = u.getHost() + u.getPath();
+        holder.listItemView.setText(text);
     }
 
     public int getItemCount() {
@@ -62,6 +58,13 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
             return 0;
     }
 
+    public interface ListItemClickListener {
+        void onListItemClick(int clickedItemIndex);
+
+        void onShareButtonClick(int clickedItemIndex);
+
+        void onSearchButtonClick(int clickedItemIndex);
+    }
 
      class UriViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
          TextView listItemView;
