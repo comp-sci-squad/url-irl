@@ -29,18 +29,9 @@
 
     <TextView
         android:id="@+id/text_view_share_button"
-        android:textSize="12sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="@string/share_label"
-        android:background="@drawable/button_selector"
         android:drawableTop="@android:drawable/ic_menu_share"
-        android:drawableTint="@color/colorPrimaryLight"
-        android:drawablePadding="2dp"
-
-        android:layout_marginLeft="36dp"
-        android:layout_marginTop="8dp"
-
+        style="@style/AppTheme.UrlButtonStyle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewUrl"
         app:layout_constraintLeft_toLeftOf="@+id/textViewUrl" />
@@ -48,17 +39,12 @@
 
     <TextView
         android:id="@+id/text_view_search_button"
-        android:textSize="12sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="@string/search_label"
-        android:background="@drawable/button_selector"
         android:drawableTop="@android:drawable/ic_menu_search"
-        android:drawableTint="@color/colorPrimaryLight"
-        android:drawablePadding="2dp"
-
+        style="@style/AppTheme.UrlButtonStyle"
+        app:layout_constraintLeft_toRightOf="@+id/text_view_share_button"
         android:layout_marginLeft="36dp"
-        app:layout_constraintTop_toTopOf="@+id/text_view_share_button"
-        app:layout_constraintLeft_toRightOf="@+id/text_view_share_button" />
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/textViewUrl" />
 
 </android.support.constraint.ConstraintLayout>
