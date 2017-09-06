@@ -19,6 +19,7 @@ import android.view.Surface;
 import android.view.View;
 import android.widget.ImageButton;
 import android.util.Log;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 
@@ -41,6 +42,7 @@ public class MainActivity extends Activity implements
 
     private CameraView mCamera;
     private ImageButton mShutterButton;
+    private ProgressBar mProgressBar;
 
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
@@ -79,6 +81,12 @@ public class MainActivity extends Activity implements
         }
 
         @Override
+        protected void onPreExecute() {
+            if (!isCancelled())
+                mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         protected Intent doInBackground(Bitmap... params) {
             Log.d(TAG, "URL Parsing Task Started");
             ArrayList<String> result = new ArrayList<>();
@@ -100,6 +108,7 @@ public class MainActivity extends Activity implements
         @Override
         protected void onPostExecute(Intent intent) {
             Log.d(TAG, "URL Parsing Task Ended.");
+            mProgressBar.setVisibility(View.INVISIBLE);
             startActivity(intent);
         }
     }
@@ -162,6 +171,8 @@ public class MainActivity extends Activity implements
 
         mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
         mShutterButton.setOnClickListener(mOnClickListener);
+
+        mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
     }
 
     @Override
