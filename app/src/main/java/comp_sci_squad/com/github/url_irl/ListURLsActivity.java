@@ -1,5 +1,7 @@
 package comp_sci_squad.com.github.url_irl;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
@@ -148,6 +150,15 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         Uri searchUri = Uri.parse(googleSearchUrl + mAdapter.getUri(clickedItemIndex).getHost());
         Intent searchIntent = new Intent(Intent.ACTION_VIEW, searchUri);
         startActivity(searchIntent);
+    }
+
+    @Override
+    public void onListItemLongClick(int clickedItemIndex) {
+        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("URL", mAdapter.getUri(clickedItemIndex).toString());
+        clipboardManager.setPrimaryClip(clip);
+        Toast copyToast = Toast.makeText(this, R.string.copy_to_clipboard, Toast.LENGTH_SHORT);
+        copyToast.show();
     }
 
     /**
