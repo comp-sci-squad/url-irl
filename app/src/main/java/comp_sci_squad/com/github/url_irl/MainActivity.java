@@ -2,6 +2,7 @@ package comp_sci_squad.com.github.url_irl;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -18,12 +19,16 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.widget.ImageButton;
+import android.util.Log;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.os.AsyncTask;
 
 import com.google.android.cameraview.CameraView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -40,7 +45,9 @@ public class MainActivity extends Activity implements
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
     private CameraView mCamera;
+
     ImageButton mShutterButton;
+    ProgressBar mProgressBar;
 
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
@@ -61,40 +68,75 @@ public class MainActivity extends Activity implements
                     super.onPictureTaken(cameraView, data);
                     Log.d(TAG, "Picture taken");
 
+                    mShutterButton.setOnClickListener(null);
+
                     Display display = getWindowManager().getDefaultDisplay();
                     Bitmap image = rotatePictureByOrientation(data, display.getRotation());
-                    long timePictureTaken = System.currentTimeMillis();
-                    String[] textArr = ImageToString.getTextFromPage(getApplicationContext(), image);
 
-                    Log.d(TAG, "Converted image to text: ");
+                    TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this,
+                            System.currentTimeMillis());
 
-                    for (String text : textArr)
-                        Log.v(TAG, text);
-
-
-                    byte[] compressedByteArray = compressBitmap(image);
-                    Intent i = ListURLsActivity.newIntent(MainActivity.this, textArr);
-                    i.putExtra(PICTURE_EXTRA, compressedByteArray);
-                    i.putExtra(TIME_EXTRA, timePictureTaken);
-                    startActivity(i);
+                    parsingTask.execute(image);
                 }
             };
+
+    protected class TextRecognitionTask extends AsyncTask<Bitmap, Integer, Intent> {
+        private Context mContext;
+        private long mTimeImageTaken;
+
+        public TextRecognitionTask(Context context, long timeImageTaken) {
+            mContext = context;
+            mTimeImageTaken = timeImageTaken;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            if (!isCancelled())
+                mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Intent doInBackground(Bitmap... params) {
+            Log.d(TAG, "URL Parsing Task Started");
+            ArrayList<String> result = new ArrayList<>();
+            byte[] compressedImage = null;
+
+            for (Bitmap image : params) {
+                Log.d(TAG, "Converted image to text: ");
+
+                result.addAll(ImageToString.getTextFromPage(mContext, image));
+                compressedImage = compressBitmap(image);
+            }
+
+            Intent intent = ListURLsActivity.newIntent(mContext, result);
+            intent.putExtra(PICTURE_EXTRA, compressedImage);
+            intent.putExtra(TIME_EXTRA, mTimeImageTaken);
+
+            return intent;
+        }
+
+        @Override
+        protected void onPostExecute(Intent intent) {
+            Log.d(TAG, "URL Parsing Task Ended.");
+            mProgressBar.setVisibility(View.INVISIBLE);
+            startActivity(intent);
+        }
+    }
 
     private View.OnClickListener mOnClickListener =
             new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    switch (v.getId()) {
-                        case R.id.shutter_button:
-                            if (mCamera != null) {
-                                Log.d(TAG, "Shutter Button Pressed");
-                                mCamera.takePicture();
-                            }
-                            break;
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.shutter_button:
+                    if (mCamera != null) {
+                        Log.d(TAG, "Shutter Button Pressed");
+                        mCamera.takePicture();
                     }
-                }
-
-            };
+                    break;
+            }
+        }
+    };
 
     public static boolean isEmulator() {
         return Build.FINGERPRINT.startsWith("generic")
@@ -116,12 +158,14 @@ public class MainActivity extends Activity implements
             InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
 
-            String[] allText = ImageToString.getTextFromPage(this, bitmap);
+            ArrayList<String> allText = ImageToString.getTextFromPage(this, bitmap);
 
             // Start the intent to get a List of Strings from the image
             Intent i = ListURLsActivity.newIntent(MainActivity.this, allText);
+            i.putExtra(PICTURE_EXTRA, compressBitmap(bitmap));
+            i.putExtra(TIME_EXTRA, System.currentTimeMillis());
             startActivity(i);
-        }// if program was ran on an emulator
+        } // if program was ran on an emulator
         else {
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -130,7 +174,7 @@ public class MainActivity extends Activity implements
                         String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
             } else
                 inflateViews();
-        }// if program isn't ran on an emulator
+        }
     }
 
     private void inflateViews() {
@@ -139,6 +183,8 @@ public class MainActivity extends Activity implements
 
         mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
         mShutterButton.setOnClickListener(mOnClickListener);
+
+        mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
     }
 
     @Override

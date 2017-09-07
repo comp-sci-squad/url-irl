@@ -9,7 +9,6 @@
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:title="@string/list_urls_title"
         android:background="?attr/colorPrimary"
         app:titleTextColor="@android:color/white"
         android:elevation="@dimen/toolbar_elevation"

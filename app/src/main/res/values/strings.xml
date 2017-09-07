@@ -2,11 +2,11 @@
     //App stuff
     <string name="app_name">URL_IRL</string>
     <string name="title_activity_camera_viewer">URL_IRL</string>
-    <string name="title_activity_list_urls">ListURLsActivity</string>
+    <string name="title_activity_list_urls">Urls Found</string>
 
     //Cameraview Activity
     <string name="photo_prompt">Take a picture!</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Share all URLs</string>
     <string name="camera_prompt">"Take a picture of a website address"</string>
     <string name="need_permission">This app requires the camera to function. Please enable it under the permissions tab under settings.</string>
     <string name="low_storage_error">Text detector dependencies cannot be downloaded due to low device storage</string>
@@ -21,5 +21,6 @@
     <string name="share_label">Share</string>
     <string name="search_label">Search</string>
     <string name="timestamp_default" translatable="false">Aug 29, 2017 12:17 AM</string>
-    <string name="timestamp_format_pattern" translatable="false"> MMM d, yyyy HH:mm a</string>
+    <string name="timestamp_format_pattern"> MMM d, yyyy h:mm a</string>
+    <string name="copy_to_clipboard">Copied to Clipboard!</string>
 </resources>

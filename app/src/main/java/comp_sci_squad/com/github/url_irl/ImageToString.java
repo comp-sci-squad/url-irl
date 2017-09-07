@@ -1,5 +1,3 @@
-
-
 package comp_sci_squad.com.github.url_irl;
 
 import android.content.Context;
@@ -24,7 +22,7 @@ import java.util.ArrayList;
 public class ImageToString {
     private static final String TAG = "ImageToString";
 
-    public static String[] getTextFromPage(Context context, Bitmap bitmap) {
+    public static ArrayList<String> getTextFromPage(Context context, Bitmap bitmap) {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
 
         // Create a frame from the bitmap and run text detection on the frame.
@@ -49,7 +47,7 @@ public class ImageToString {
         return getStrings(textBlockSparseArray);
     }
 
-    private static String[] getStrings(SparseArray<TextBlock> tester) {
+    private static ArrayList<String> getStrings(SparseArray<TextBlock> tester) {
         ArrayList<String> inputString = new ArrayList<>();
 
         Log.d(TAG, "Strings found:");
@@ -57,6 +55,6 @@ public class ImageToString {
             Log.d(TAG, tester.valueAt(i).getValue());
             inputString.add(tester.valueAt(i).getValue());
         }
-        return inputString.toArray(new String[inputString.size()]);
+        return inputString;
     }
 }
