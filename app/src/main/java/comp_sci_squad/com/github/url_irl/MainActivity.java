@@ -145,10 +145,7 @@ public class MainActivity extends Activity implements
             Log.d(TAG, "URL Parsing Task Ended.");
             mProgressBar.setVisibility(View.INVISIBLE);
 
-            if (isEmulator())
-                mShutterButton.setOnClickListener(mEmulatorOnClickListener);
-            else
-                mShutterButton.setOnClickListener(mOnClickListener);
+            mShutterButton.setEnabled(true);
 
             startActivity(intent);
         }
@@ -164,7 +161,7 @@ public class MainActivity extends Activity implements
                         mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
                         mCamera.takePicture();
 
-                        mShutterButton.setOnClickListener(null);
+                        mShutterButton.setEnabled(false);
                     }
                     break;
             }
@@ -184,7 +181,7 @@ public class MainActivity extends Activity implements
 
                     parsingTask.execute(mEmulatorImage);
 
-                    mShutterButton.setOnClickListener(null);
+                    mShutterButton.setEnabled(false);
                     break;
             }
         }
