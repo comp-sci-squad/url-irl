@@ -22,6 +22,14 @@ import java.util.ArrayList;
 public class ImageToString {
     private static final String TAG = "ImageToString";
 
+    /**
+     * Parses an image for text.
+     *
+     * @param context - a context to associate the text recognizer with.
+     * @param bitmap - an image to recognize text from.
+     * @return ArrayList&lt&lt;String&gt; - An arraylist of strings of text from each "block" in
+     * the picture.
+     */
     public static ArrayList<String> getTextFromPage(Context context, Bitmap bitmap) {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
 
@@ -41,12 +49,16 @@ public class ImageToString {
             }
         }
 
-        // Although detector may be used multiple times for different images, it should be released
-        // when it is no longer needed in order to free native resources.
         textRecognizer.release();
         return getStrings(textBlockSparseArray);
     }
 
+    /**
+     * Creates an ArrayList of strings from a sparse array of TextBlocks.
+     *
+     * @param tester - A sparse array of detected text from a picture.
+     * @return ArrayList&lt;String&gt; - the text found in the image.
+     */
     private static ArrayList<String> getStrings(SparseArray<TextBlock> tester) {
         ArrayList<String> inputString = new ArrayList<>();
 
