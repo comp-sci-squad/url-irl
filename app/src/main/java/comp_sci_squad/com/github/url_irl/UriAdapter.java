@@ -46,9 +46,8 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
         boolean shouldAttachToParentImmediately = false;
 
         View view = inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately);
-        UriViewHolder viewHolder = new UriViewHolder(view);
 
-        return viewHolder;
+        return new UriViewHolder(view);
     }
 
     public void onBindViewHolder(UriViewHolder holder, int position) {
