@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.MediaActionSound;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -48,6 +49,8 @@ public class MainActivity extends Activity implements
 
     ImageButton mShutterButton;
     ProgressBar mProgressBar;
+    MediaActionSound mShutterSound;
+
 
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
@@ -66,6 +69,7 @@ public class MainActivity extends Activity implements
                 @Override
                 public void onPictureTaken(CameraView cameraView, byte[] data) {
                     super.onPictureTaken(cameraView, data);
+
                     Log.d(TAG, "Picture taken");
 
                     mShutterButton.setOnClickListener(null);
@@ -131,6 +135,7 @@ public class MainActivity extends Activity implements
                 case R.id.shutter_button:
                     if (mCamera != null) {
                         Log.d(TAG, "Shutter Button Pressed");
+                        mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
                         mCamera.takePicture();
                     }
                     break;
@@ -147,12 +152,16 @@ public class MainActivity extends Activity implements
                 || Build.MANUFACTURER.contains("Genymotion")
                 || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
                 || "google_sdk".equals(Build.PRODUCT);
+
     }
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.v(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
+
+        mShutterSound = new MediaActionSound();
+        mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
 
         if(isEmulator()) {
             InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
@@ -211,6 +220,7 @@ public class MainActivity extends Activity implements
 
     @Override
     protected void onDestroy() {
+        mShutterSound.release();
         Log.v(TAG, "onDestroy()");
         super.onDestroy();
     }
