@@ -30,7 +30,7 @@
 
         <activity
             android:name=".ListURLsActivity"
-            android:label="@string/title_activity_list_urls"
+            android:label="@string/list_urls_title"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
