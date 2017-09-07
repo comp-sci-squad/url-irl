@@ -2,7 +2,7 @@
     //App stuff
     <string name="app_name">URL_IRL</string>
     <string name="title_activity_camera_viewer">URL_IRL</string>
-    <string name="title_activity_list_urls">ListURLsActivity</string>
+    <string name="title_activity_list_urls">Urls Found</string>
 
     //Cameraview Activity
     <string name="photo_prompt">Take a picture!</string>
