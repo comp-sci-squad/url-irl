@@ -34,7 +34,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     private static final String TAG = "ListURLSActivity";
     private UriAdapter mAdapter;
     private RecyclerView recyclerView;
-    private String[] mStringBlocks;
+    private ArrayList<String> mStringBlocks;
     private ProgressBar mLoadingIndicator;
     private ImageView mImageView;
     private byte[] urlScanImage;
@@ -56,7 +56,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         long timePictureTaken = 0;
         Intent sourceIntent = getIntent();
         if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST))) {
-            mStringBlocks = sourceIntent.getStringArrayExtra(getString(R.string.URI_ARRAY_LIST));
+            mStringBlocks = sourceIntent.getStringArrayListExtra(getString(R.string.URI_ARRAY_LIST));
 
             urlScanImage = sourceIntent.getByteArrayExtra(MainActivity.PICTURE_EXTRA);
             timePictureTaken = sourceIntent.getLongExtra(MainActivity.TIME_EXTRA, 0);
@@ -82,8 +82,8 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
         //Converts arraylist<string> to var args and runs the async task
         Log.d(TAG, "Starting UrlParseTask");
-       new UrlParseTask().execute(mStringBlocks);
 
+        new UrlParseTask().execute(mStringBlocks.toArray(new String[mStringBlocks.size()]));
 
     }
 
@@ -117,7 +117,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         }
     }
 
-    public static Intent newIntent(Context packageContext, String[] stringList) {
+    public static Intent newIntent(Context packageContext, ArrayList<String> stringList) {
         Log.d(TAG, "Getting Intent");
 
         Intent i = new Intent(packageContext, ListURLsActivity.class);
