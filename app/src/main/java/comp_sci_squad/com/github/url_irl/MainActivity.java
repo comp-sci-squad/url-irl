@@ -33,25 +33,47 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
+    /**
+     * Extra Name Constants for the ListURLsActivity Intent
+     *
+     * PICTURE_EXTRA labels a byte array
+     * TIME_EXTRA labels a long
+     */
     public static final String PICTURE_EXTRA = "bitmapBytes";
     public static final String TIME_EXTRA = "time";
 
+    /**
+     * Rotation Offset Constants
+     *
+     * Defines the transformations that align camera orientation with
+     * device orientation per each angle.
+     */
     private final float[] OFFSET = {90.0f, 0.0f, -90.0f, -180.0f};
     final int INDEX_OFFSET_AT_0 = 0;
     final int INDEX_OFFSET_AT_90 = 1;
     final int INDEX_OFFSET_AT_180 = 2;
     final int INDEX_OFFSET_AT_270 = 3;
 
+    /**
+     * Logging Tag
+     */
     private String TAG = "CAMERA_ACTIVITY";
+
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
+
+    /**
+     * View variables
+     */
     private CameraView mCamera;
 
     ImageButton mShutterButton;
     ProgressBar mProgressBar;
     MediaActionSound mShutterSound;
 
-
+    /**
+     * Listener for the CameraView.
+     */
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
                 @Override
@@ -127,8 +149,10 @@ public class MainActivity extends Activity implements
         }
     }
 
-    private View.OnClickListener mOnClickListener =
-            new View.OnClickListener() {
+    /**
+     * Listener for the shutter button.
+     */
+    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
@@ -143,6 +167,14 @@ public class MainActivity extends Activity implements
         }
     };
 
+    /**
+     * Checks if the app is run on an emulator.
+     *
+     * Warning: this and other emulator code should be removed from release
+     * versions of the app, as it is rumored to yield some false positives.
+     *
+     * @return boolean - True if the app is being run on an emulator.
+     */
     public static boolean isEmulator() {
         return Build.FINGERPRINT.startsWith("generic")
                 || Build.FINGERPRINT.startsWith("unknown")
@@ -186,6 +218,9 @@ public class MainActivity extends Activity implements
         }
     }
 
+    /**
+     * Associates view variables with their layout counterparts.
+     */
     private void inflateViews() {
         mCamera = (CameraView) findViewById(R.id.camera);
         mCamera.addCallback(mCameraCallback);
@@ -243,6 +278,14 @@ public class MainActivity extends Activity implements
         }
     }
 
+    /**
+     * Rotates an image so that it's orientation matches the phone's, as camera orientation
+     * and phone orientation differ.
+     *
+     * @param imageData - a byte array of image data
+     * @param rotation - a integer corresponding to the rotation of the phone.
+     * @return Bitmap - a picture that is rotated properly according to the phone orientation.
+     */
     private Bitmap rotatePictureByOrientation(byte[] imageData, int rotation) {
         float rotationAmount = 0.0f; // Picture is sideways + camera rotation
         switch (rotation) {
@@ -275,6 +318,12 @@ public class MainActivity extends Activity implements
         return  img;
     }
 
+    /**
+     * Compresses a bitmap so that it is small enough to pass as an extra in an intent.
+     *
+     * @param image - a bitmap to be compressed.
+     * @return byte[] of compressed data from the image.
+     */
     private byte[] compressBitmap(Bitmap image) {
         Log.d(TAG, "Compressing thumbnail Bitmap");
         int thumbnailHeight = image.getHeight()/8;
