@@ -144,6 +144,12 @@ public class MainActivity extends Activity implements
         protected void onPostExecute(Intent intent) {
             Log.d(TAG, "URL Parsing Task Ended.");
             mProgressBar.setVisibility(View.INVISIBLE);
+
+            if (isEmulator())
+                mShutterButton.setOnClickListener(mEmulatorOnClickListener);
+            else
+                mShutterButton.setOnClickListener(mOnClickListener);
+
             startActivity(intent);
         }
     }
