@@ -17,7 +17,7 @@
         android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="@+id/rv_id"
-        app:layout_constraintRight_toRightOf="@+id/rv_id" />
+        app:layout_constraintRight_toRightOf="parent" />
 
     <ProgressBar
         android:id="@+id/loading_indicator"
@@ -30,35 +30,39 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_id"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="@dimen/thumbnail_timestamp_margin"
-        app:layout_constraintBottom_toTopOf="@+id/thumbnail_and_timestamp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintVertical_bias="0.0"
-
-        android:scrollbars="vertical"
-        android:scrollbarStyle="outsideOverlay">
-    </android.support.v7.widget.RecyclerView>
 
     <include layout="@layout/thumbnail"
         android:id="@+id/thumbnail_and_timestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:layout_marginLeft="@dimen/thumbnail_timestamp_margin"
-        android:layout_marginRight="@dimen/thumbnail_timestamp_margin"
-        android:layout_marginBottom="@dimen/thumbnail_timestamp_margin"
+        android:layout_marginRight="@dimen/thumbnail_timestamp_margin_land"
+        android:layout_marginBottom="@dimen/thumbnail_timestamp_margin_land"
+        android:layout_marginTop="@dimen/thumbnail_timestamp_margin_land"
 
 
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_id"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="@dimen/thumbnail_timestamp_margin_land"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/thumbnail_and_timestamp"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintVertical_bias="0.0"
+
+        android:scrollbars="vertical"
+        android:scrollbarStyle="outsideOverlay">
+
+    </android.support.v7.widget.RecyclerView>
 
 </android.support.constraint.ConstraintLayout>

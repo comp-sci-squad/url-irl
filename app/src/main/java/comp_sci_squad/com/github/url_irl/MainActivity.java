@@ -8,13 +8,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.View;
@@ -22,7 +22,7 @@ import android.widget.ImageButton;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
+import android.os.AsyncTask;
 
 import com.google.android.cameraview.CameraView;
 
@@ -32,18 +32,22 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
+    public static final String PICTURE_EXTRA = "bitmapBytes";
+    public static final String TIME_EXTRA = "time";
+
     private final float[] OFFSET = {90.0f, 0.0f, -90.0f, -180.0f};
-    private final int INDEX_OFFSET_AT_0 = 0;
-    private final int INDEX_OFFSET_AT_90 = 1;
-    private final int INDEX_OFFSET_AT_180 = 2;
-    private final int INDEX_OFFSET_AT_270 = 3;
+    final int INDEX_OFFSET_AT_0 = 0;
+    final int INDEX_OFFSET_AT_90 = 1;
+    final int INDEX_OFFSET_AT_180 = 2;
+    final int INDEX_OFFSET_AT_270 = 3;
 
     private String TAG = "CAMERA_ACTIVITY";
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
     private CameraView mCamera;
-    private ImageButton mShutterButton;
-    private ProgressBar mProgressBar;
+
+    ImageButton mShutterButton;
+    ProgressBar mProgressBar;
 
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
@@ -69,16 +73,20 @@ public class MainActivity extends Activity implements
                     Display display = getWindowManager().getDefaultDisplay();
                     Bitmap image = rotatePictureByOrientation(data, display.getRotation());
 
-                    TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this);
+                    TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this,
+                            System.currentTimeMillis());
+
                     parsingTask.execute(image);
                 }
             };
 
     protected class TextRecognitionTask extends AsyncTask<Bitmap, Integer, Intent> {
         private Context mContext;
+        private long mTimeImageTaken;
 
-        public TextRecognitionTask(Context context) {
+        public TextRecognitionTask(Context context, long timeImageTaken) {
             mContext = context;
+            mTimeImageTaken = timeImageTaken;
         }
 
         @Override
@@ -101,7 +109,8 @@ public class MainActivity extends Activity implements
             }
 
             Intent intent = ListURLsActivity.newIntent(mContext, result);
-            intent.putExtra("bitmapBytes", compressedImage);
+            intent.putExtra(PICTURE_EXTRA, compressedImage);
+            intent.putExtra(TIME_EXTRA, mTimeImageTaken);
 
             return intent;
         }
@@ -114,7 +123,8 @@ public class MainActivity extends Activity implements
         }
     }
 
-    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+    private View.OnClickListener mOnClickListener =
+            new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
@@ -141,6 +151,7 @@ public class MainActivity extends Activity implements
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
 
         if(isEmulator()) {
@@ -151,6 +162,8 @@ public class MainActivity extends Activity implements
 
             // Start the intent to get a List of Strings from the image
             Intent i = ListURLsActivity.newIntent(MainActivity.this, allText);
+            i.putExtra(PICTURE_EXTRA, compressBitmap(bitmap));
+            i.putExtra(TIME_EXTRA, System.currentTimeMillis());
             startActivity(i);
         } // if program was ran on an emulator
         else {
@@ -177,10 +190,11 @@ public class MainActivity extends Activity implements
     @Override
     protected void onResume() {
         super.onResume();
-        Log.v(TAG, "Camera Resuming");
+        Log.v(TAG, "onResume()");
 
         if (mCamera != null)
             mCamera.start();
+        Log.v(TAG, "Camera Resumed");
 
         Toast.makeText(this, R.string.camera_prompt, Toast.LENGTH_LONG).show();
     }

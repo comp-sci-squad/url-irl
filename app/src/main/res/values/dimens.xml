@@ -2,4 +2,9 @@
     <dimen name="app_bar_height">180dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+    <dimen name="thumbnail_padding">5dp</dimen>
+    <dimen name="loading_indicator_size">48dp</dimen>
+    <dimen name="toolbar_elevation">4dp</dimen>
+    <dimen name="thumbnail_timestamp_margin">16dp</dimen>
+    <dimen name="thumbnail_timestamp_margin_land">8dp</dimen>
 </resources>

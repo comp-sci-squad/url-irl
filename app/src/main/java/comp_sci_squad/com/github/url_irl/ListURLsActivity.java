@@ -1,26 +1,31 @@
 package comp_sci_squad.com.github.url_irl;
 
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import comp_sci_squad.com.github.url_irl.utilities.FormattingUtils;
 
 public class ListURLsActivity extends AppCompatActivity implements UriAdapter.ListItemClickListener {
 
@@ -32,6 +37,9 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     private ImageView mImageView;
     private byte[] urlScanImage;
     private Toolbar mToolBar;
+    private TextView mTimestamp;
+    private ShareActionProvider mShareActionProvider;
+    private Intent shareIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,17 +51,20 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
 
         Log.d(TAG, "On create " + TAG);
-
+        long timePictureTaken = 0;
         Intent sourceIntent = getIntent();
         if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST))) {
             mStringBlocks = sourceIntent.getStringArrayListExtra(getString(R.string.URI_ARRAY_LIST));
 
-            urlScanImage = sourceIntent.getByteArrayExtra("bitmapBytes");
+            urlScanImage = sourceIntent.getByteArrayExtra(MainActivity.PICTURE_EXTRA);
+            timePictureTaken = sourceIntent.getLongExtra(MainActivity.TIME_EXTRA, 0);
         }
 
         Log.d(TAG, "Creating Recycler view, progress bar, layout manager, and URIADapter");
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
+        mTimestamp = (TextView) findViewById(R.id.timestamp);
+        mTimestamp.setText(FormattingUtils.formatTimeStamp(timePictureTaken, getString(R.string.timestamp_format_pattern)));
 
         if(!MainActivity.isEmulator()) {
             mImageView = (ImageView) findViewById(R.id.image_thumbnail);
@@ -69,7 +80,39 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
         //Converts arraylist<string> to var args and runs the async task
         Log.d(TAG, "Starting UrlParseTask");
+
         new UrlParseTask().execute(mStringBlocks.toArray(new String[mStringBlocks.size()]));
+
+    }
+
+    /**
+     * Create an options menu. It will create
+     *  - Share All Button
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_list_urls, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.share_all:
+                // Share the URLS
+                if (shareIntent != null)
+                    startActivity(Intent.createChooser(shareIntent, "Share using"));
+                else
+                    Log.e(TAG, "Share intent was null");
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
     }
 
     public static Intent newIntent(Context packageContext, ArrayList<String> stringList) {
@@ -95,14 +138,14 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         shareIntent.setType("text/plain");
         //shareIntent.putExtra(Intent.EXTRA_SUBJECT, "R.string.sharing_url_subject");
         shareIntent.putExtra(Intent.EXTRA_TEXT, mAdapter.getUri(clickedItemIndex).toString());
-        startActivity(shareIntent);
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.share_label)));
     }
 
     @Override
     public void onSearchButtonClick(int clickedItemIndex) {
         Log.d(TAG, "onSearchButtonClick");
         String googleSearchUrl = "https://www.google.com/search?q=";
-        Uri searchUri = Uri.parse("https://www.google.com/search?q=" + mAdapter.getUri(clickedItemIndex).getHost());
+        Uri searchUri = Uri.parse(googleSearchUrl + mAdapter.getUri(clickedItemIndex).getHost());
         Intent searchIntent = new Intent(Intent.ACTION_VIEW, searchUri);
         startActivity(searchIntent);
     }
@@ -156,6 +199,15 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         @Override
         protected void onPostExecute(ArrayList<Uri> urls) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
+            // Share intent
+            String shareString = "";
+            for (Uri uri : urls)
+                shareString += uri.toString() + "\n";
+            shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareString);
+            shareIntent.setType("text/plain");
+
             Toast.makeText(getApplicationContext(), "Loaded " + urls.size() + " URLS", Toast.LENGTH_SHORT).show();
             mAdapter.setArray(urls);
         }
