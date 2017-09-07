@@ -34,7 +34,6 @@ public class MainActivity extends Activity implements
     public static final String TIME_EXTRA = "time";
 
     private final float[] OFFSET = {90.0f, 180.0f, -90.0f, 0.0f};
-    private final float[] UI_ROTATION_OFFSET = {0.0f, -90.0f, 180.0f, 90.0f};
     private final int INDEX_OFFSET_AT_0 = 0;
     private final int INDEX_OFFSET_AT_90 = 1;
     private final int INDEX_OFFSET_AT_180 = 2;
@@ -106,7 +105,7 @@ public class MainActivity extends Activity implements
         if (diff > 55) {
             int newOrientation = Math.round(orientation/90.0f) % 4;
             float previousRotation = mShutterButton.getRotation();
-            float newRotation = UI_ROTATION_OFFSET[newOrientation];
+            float newRotation = -newOrientation * 90.0f;
             Log.d(TAG, "Rotate Previous: " + previousRotation + "   Rotate New: " + newRotation);
             RotateAnimation rotate = new RotateAnimation(previousRotation, newRotation,
                     RotateAnimation.RELATIVE_TO_SELF, 0.5f,
