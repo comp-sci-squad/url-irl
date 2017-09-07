@@ -3,6 +3,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
@@ -15,7 +16,9 @@
         app:autoFocus="true"
         app:aspectRatio="4:3"
         app:facing="back"
-        app:flash="off"/>
+        app:flash="off">
+
+    </com.google.android.cameraview.CameraView>
 
     <ProgressBar
         android:id="@+id/loading_indicator"
@@ -24,17 +27,29 @@
         android:layout_height="48dp"
         android:layout_marginRight="8dp"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"/>
+        android:layout_centerVertical="true"
+        tools:ignore="RtlHardcoded" />
 
     <ImageButton
         android:id="@+id/shutter_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="25dp"
+        android:layout_marginBottom="26dp"
         android:adjustViewBounds="false"
         android:cropToPadding="false"
-        android:src="@drawable/ic_cam_icon" />
+        android:src="@drawable/ic_cam_icon"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/loading_indicator" />
+
+    <ImageButton
+        android:id="@+id/flashlight_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:layout_marginStart="26dp"
+        android:src="@drawable/ic_cam_icon"
+        android:layout_alignTop="@+id/shutter_button"
+        android:layout_toEndOf="@+id/shutter_button" />
 
 </RelativeLayout>
