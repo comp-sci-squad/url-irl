@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -128,8 +129,6 @@ public class MainActivity extends Activity implements
     };
 
     public static boolean isEmulator() {
-        return false;
-        /*
         return Build.FINGERPRINT.startsWith("generic")
                 || Build.FINGERPRINT.startsWith("unknown")
                 || Build.MODEL.contains("google_sdk")
@@ -137,7 +136,7 @@ public class MainActivity extends Activity implements
                 || Build.MODEL.contains("Android SDK built for x86")
                 || Build.MANUFACTURER.contains("Genymotion")
                 || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-                || "google_sdk".equals(Build.PRODUCT);*/
+                || "google_sdk".equals(Build.PRODUCT);
     }
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
