@@ -21,6 +21,7 @@ import android.view.Surface;
 import android.view.View;
 import android.widget.ImageButton;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.os.AsyncTask;
@@ -61,10 +62,6 @@ public class MainActivity extends Activity implements
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
-
-    /**
-     * View variables
-     */
     private CameraView mCamera;
 
     ImageButton mShutterButton;
@@ -72,8 +69,12 @@ public class MainActivity extends Activity implements
     MediaActionSound mShutterSound;
 
     /**
-     * Listener for the CameraView.
+     * Emulator Variables. Remove before release.
      */
+    ImageView mEmulatorPicture;
+    Bitmap mEmulatorImage;
+
+
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
                 @Override
@@ -93,8 +94,6 @@ public class MainActivity extends Activity implements
                     super.onPictureTaken(cameraView, data);
 
                     Log.d(TAG, "Picture taken");
-
-                    mShutterButton.setOnClickListener(null);
 
                     Display display = getWindowManager().getDefaultDisplay();
                     Bitmap image = rotatePictureByOrientation(data, display.getRotation());
@@ -149,9 +148,6 @@ public class MainActivity extends Activity implements
         }
     }
 
-    /**
-     * Listener for the shutter button.
-     */
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -161,7 +157,28 @@ public class MainActivity extends Activity implements
                         Log.d(TAG, "Shutter Button Pressed");
                         mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
                         mCamera.takePicture();
+
+                        mShutterButton.setOnClickListener(null);
                     }
+                    break;
+            }
+        }
+    };
+
+    private View.OnClickListener mEmulatorOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.shutter_button:
+                    Log.d(TAG, "Shutter Button Pressed");
+                    mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
+
+                    TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this,
+                            System.currentTimeMillis());
+
+                    parsingTask.execute(mEmulatorImage);
+
+                    mShutterButton.setOnClickListener(null);
                     break;
             }
         }
@@ -189,25 +206,24 @@ public class MainActivity extends Activity implements
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG, "onCreate()");
-        setContentView(R.layout.activity_main);
-
-        mShutterSound = new MediaActionSound();
-        mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
+        Log.v(TAG, "onCreate()");;
 
         if(isEmulator()) {
+            Log.w(TAG, "Emulator display. Remove before release.");
+            setContentView(R.layout.emulator_main_activity);
+
             InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
-            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+            mEmulatorImage = BitmapFactory.decodeStream(stream);
 
-            ArrayList<String> allText = ImageToString.getTextFromPage(this, bitmap);
+            mEmulatorPicture = (ImageView) findViewById(R.id.emulator_image);
+            mEmulatorPicture.setImageBitmap(mEmulatorImage);
 
-            // Start the intent to get a List of Strings from the image
-            Intent i = ListURLsActivity.newIntent(MainActivity.this, allText);
-            i.putExtra(PICTURE_EXTRA, compressBitmap(bitmap));
-            i.putExtra(TIME_EXTRA, System.currentTimeMillis());
-            startActivity(i);
-        } // if program was ran on an emulator
-        else {
+            mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
+            mShutterButton.setOnClickListener(mEmulatorOnClickListener);
+
+            mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
+        } else {
+            setContentView(R.layout.activity_main);
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -216,6 +232,9 @@ public class MainActivity extends Activity implements
             } else
                 inflateViews();
         }
+
+        mShutterSound = new MediaActionSound();
+        mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
     }
 
     /**
@@ -318,12 +337,6 @@ public class MainActivity extends Activity implements
         return  img;
     }
 
-    /**
-     * Compresses a bitmap so that it is small enough to pass as an extra in an intent.
-     *
-     * @param image - a bitmap to be compressed.
-     * @return byte[] of compressed data from the image.
-     */
     private byte[] compressBitmap(Bitmap image) {
         Log.d(TAG, "Compressing thumbnail Bitmap");
         int thumbnailHeight = image.getHeight()/8;
