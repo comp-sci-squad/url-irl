@@ -16,7 +16,7 @@
     <string name="URI_ARRAY_LIST">comp_sci_squad.com.github.url_irl.uri_array_true</string>
     <string name="string_number_of_strings">Number of Strings in List: </string>
     <string name="strings_list">List: </string>
-    <string name="list_urls_title">Scanned URLS:</string>
+    <string name="list_urls_title">Scanned URLs</string>
     <string name="sharing_url_subject">Sharing URL:</string>
     <string name="share_label">Share</string>
     <string name="search_label">Search</string>
