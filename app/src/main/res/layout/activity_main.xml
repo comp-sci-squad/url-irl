@@ -19,7 +19,7 @@
 
     <ProgressBar
         android:id="@+id/loading_indicator"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginRight="8dp"

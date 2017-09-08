@@ -20,7 +20,6 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.widget.ImageButton;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -71,7 +70,7 @@ public class MainActivity extends Activity implements
     /**
      * Emulator Variables. Remove before release.
      */
-    ImageView mEmulatorPicture;
+    ImageView mEmulatorPreview;
     Bitmap mEmulatorImage;
 
 
@@ -218,8 +217,8 @@ public class MainActivity extends Activity implements
             InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
             mEmulatorImage = BitmapFactory.decodeStream(stream);
 
-            mEmulatorPicture = (ImageView) findViewById(R.id.emulator_image);
-            mEmulatorPicture.setImageBitmap(mEmulatorImage);
+            mEmulatorPreview = (ImageView) findViewById(R.id.emulator_image);
+            mEmulatorPreview.setImageBitmap(mEmulatorImage);
 
             mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
             mShutterButton.setOnClickListener(mEmulatorOnClickListener);
