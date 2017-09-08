@@ -19,6 +19,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.util.Log;
@@ -34,6 +35,7 @@ public class MainActivity extends Activity implements
     public static final String TIME_EXTRA = "time";
 
     private final float[] OFFSET = {90.0f, 180.0f, -90.0f, 0.0f};
+    private final float[] ANIMATION_OFFSET = {0.0f, -90.0f, -180.0f, -270.0f};
     private final int INDEX_OFFSET_AT_0 = 0;
     private final int INDEX_OFFSET_AT_90 = 1;
     private final int INDEX_OFFSET_AT_180 = 2;
@@ -46,6 +48,7 @@ public class MainActivity extends Activity implements
     private ImageButton mShutterButton;
     private MyOrientationEventListener mOrientationEventListener;
     private int mLastOrientation = 0;
+    private float mLastRotation = 0.0f;
 
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
@@ -102,20 +105,27 @@ public class MainActivity extends Activity implements
     public void onOrientationChanged(int orientation) {
         int diff = Math.abs(mLastOrientation * 90 - orientation);
         diff = Math.min(diff, 360 - diff);
+
         if (diff > 55) {
             int newOrientation = Math.round(orientation/90.0f) % 4;
-            float previousRotation = mShutterButton.getRotation();
-            float newRotation = -newOrientation * 90.0f;
-            Log.d(TAG, "Rotate Previous: " + previousRotation + "   Rotate New: " + newRotation);
-            RotateAnimation rotate = new RotateAnimation(previousRotation, newRotation,
-                    RotateAnimation.RELATIVE_TO_SELF, 0.5f,
-                    RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+            float newRotation = ANIMATION_OFFSET[newOrientation];
+            Log.d(TAG, "Rotate Previous: " + mLastRotation + "   Rotate New: " + newRotation);
 
-            mShutterButton.startAnimation(rotate);
-            mShutterButton.setRotation(newRotation);
+            RotateAnimation rotateAnimation = new RotateAnimation(
+                    mLastRotation,
+                    newRotation,
+                    RotateAnimation.RELATIVE_TO_SELF,
+                    0.5f,
+                    RotateAnimation.RELATIVE_TO_SELF,
+                    0.5f);
+            rotateAnimation.setInterpolator(new LinearInterpolator());
+            rotateAnimation.setDuration(250);
+            rotateAnimation.setFillAfter(true);
+            mShutterButton.startAnimation(rotateAnimation);
+
             mLastOrientation = newOrientation;
-            Log.d(TAG, "Orientation Changed to: " + mLastOrientation);
-
+            mLastRotation = newRotation;
+            Log.d(TAG, "Orientation Changed to: " + newOrientation);
         }
     }
 
