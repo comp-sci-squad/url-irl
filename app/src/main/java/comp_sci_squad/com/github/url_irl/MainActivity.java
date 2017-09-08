@@ -35,7 +35,6 @@ public class MainActivity extends Activity implements
     public static final String TIME_EXTRA = "time";
 
     private final float[] OFFSET = {90.0f, 180.0f, -90.0f, 0.0f};
-    private final float[] ANIMATION_OFFSET = {0.0f, -90.0f, -180.0f, -270.0f};
     private final int INDEX_OFFSET_AT_0 = 0;
     private final int INDEX_OFFSET_AT_90 = 1;
     private final int INDEX_OFFSET_AT_180 = 2;
@@ -103,14 +102,28 @@ public class MainActivity extends Activity implements
         };
 
     public void onOrientationChanged(int orientation) {
+        //Calculate Difference from last Orientation
         int diff = Math.abs(mLastOrientation * 90 - orientation);
         diff = Math.min(diff, 360 - diff);
 
         if (diff > 55) {
             int newOrientation = Math.round(orientation/90.0f) % 4;
-            float newRotation = ANIMATION_OFFSET[newOrientation];
+            float newRotation = 0;
+
+            //Rotate animation forward, backward, or 180 depending on change in Orientation
+            if (newOrientation == (mLastOrientation + 1) % 4) {
+                Log.d(TAG, "Phone rotated clockwise");
+                newRotation = mLastRotation - 90.0f;
+            } else if (newOrientation == ((mLastOrientation + 3) % 4)) {
+                Log.d(TAG, "Phone rotated counterclockwise");
+                newRotation = mLastRotation + 90.0f;
+            } else {
+                Log.d(TAG, "Phone flipped");
+                newRotation = mLastRotation + 180.0f;
+            }
             Log.d(TAG, "Rotate Previous: " + mLastRotation + "   Rotate New: " + newRotation);
 
+            //Create Rotation Animation
             RotateAnimation rotateAnimation = new RotateAnimation(
                     mLastRotation,
                     newRotation,
@@ -121,8 +134,11 @@ public class MainActivity extends Activity implements
             rotateAnimation.setInterpolator(new LinearInterpolator());
             rotateAnimation.setDuration(250);
             rotateAnimation.setFillAfter(true);
+
+            //Rotate the views
             mShutterButton.startAnimation(rotateAnimation);
 
+            //Set variables for next iteration
             mLastOrientation = newOrientation;
             mLastRotation = newRotation;
             Log.d(TAG, "Orientation Changed to: " + newOrientation);
@@ -282,7 +298,7 @@ public class MainActivity extends Activity implements
         @Override
         public void onOrientationChanged(int orientation) {
             if (orientation != MyOrientationEventListener.ORIENTATION_UNKNOWN) {
-                //Log.v("Orientation", Integer.toString(orientation));
+                Log.v("Orientation", Integer.toString(orientation));
                 MainActivity.this.onOrientationChanged(orientation);
             }
         }
