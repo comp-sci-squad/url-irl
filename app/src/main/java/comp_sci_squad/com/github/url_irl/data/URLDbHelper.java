@@ -6,7 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import comp_sci_squad.com.github.url_irl.data.URLDatabaseContract.*;
 
@@ -48,22 +51,23 @@ public class URLDbHelper extends SQLiteOpenHelper {
     }
     /**
      *
-     * @param  - a url as a type string from the picture
+     * @param  - a list of URL's from the picture
      * @param  - the current time that urls' were taken
      * @return - returns true if data was successfully stored
      */
-    public boolean insertURLs(String url, String timeStamp){
+    public boolean insertURLs(ArrayList<String> urlList, String timeStamp){
         SQLiteDatabase dbs = this.getWritableDatabase();
 
+        for(int i = 0; i < urlList.size(); i++)
+        {
+            ContentValues values = new ContentValues();
+            values.put("url", urlList.get(i));
+            values.put("timestamp", timeStamp);
 
-        ContentValues values = new ContentValues();
-        values.put("url",url);
-        values.put("timestamp", timeStamp);
-
-        long result = dbs.insert( "urlList", null, values);
+            long result = dbs.insert( "urlList", null, values);
 
             if(result == -1)return false;
-
+        }
         return true;
     }
 
@@ -83,11 +87,42 @@ public class URLDbHelper extends SQLiteOpenHelper {
      * @param URLName - the time that you want to be deleted
      * @return - returns true if the item was deleted and no errors occurred
      */
-    public boolean deleteURL(String URLName)
+    public boolean deleteByURL(String URLName)
     {
         SQLiteDatabase dbs = this.getWritableDatabase();
-        dbs.delete(URLEntry.TABLE_NAME,  URLEntry.COLUMN_TIMESTAMP + " = ?" , new String[]{URLName});
+        dbs.delete(URLEntry.TABLE_NAME,  URLEntry.COLUMN_URL + " = ?" , new String[]{URLName});
         return true;
+    }
+
+
+    /**
+     * @param dateToDelete to be deleted
+     * @return true if delete was successful
+     * edit for future --> delete every url that is before a certain time stampt
+     */
+
+   private boolean deleteByTimeStamp(Date dateToDelete)
+    {
+        SQLiteDatabase dbs = this.getWritableDatabase();
+        dbs.delete(URLEntry.TABLE_NAME,  URLEntry.COLUMN_TIMESTAMP + " = ?" , new String[]{dateToDelete.toString()});
+        return true;
+    }
+
+
+    /**
+     *
+     * @param time that is used to be deleted... format must be in yyyy-MM-dd
+     */
+    public void deleteAtTimeStamp(String time)
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date dt;
+        try {
+             dt = dateFormat.parse(time);
+             deleteByTimeStamp(dt);
+        }catch(ParseException ex) {
+            ex.printStackTrace();
+        }
     }
 
 

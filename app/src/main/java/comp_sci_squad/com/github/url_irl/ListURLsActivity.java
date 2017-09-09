@@ -3,6 +3,7 @@ package comp_sci_squad.com.github.url_irl;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import comp_sci_squad.com.github.url_irl.data.URLDbHelper;
+
 public class ListURLsActivity extends AppCompatActivity implements UriAdapter.ListItemClickListener {
 
     private static final String TAG = "ListURLSActivity";
@@ -31,6 +34,8 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     private ImageView mImageView;
     private byte[] urlScanImage;
     private Toolbar mToolBar;
+    public URLDbHelper dbs;
+    public ArrayList<String> URLHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +44,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         mToolBar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolBar);
 
-
+        dbs = new URLDbHelper(this.getBaseContext());
 
         Log.d(TAG, "On create " + TAG);
 
@@ -64,9 +69,35 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         mAdapter = new UriAdapter(this);
         recyclerView.setAdapter(mAdapter);
 
+        //getURLHistory();
+        //insertURLsIntoDbs();
+
         //Converts arraylist<string> to var args and runs the async task
         Log.d(TAG, "Starting UrlParseTask");
        new UrlParseTask().execute(mStringBlocks);
+    }
+
+    /**
+     * Functions to access the URLDbsHelper
+     * -created by Kevin
+     */
+
+    public void getURLHistory()
+    {
+        Cursor temp = dbs.getURLFromDbs();
+
+        while(temp.moveToNext())
+        {
+            URLHistory.add(temp.getString(0));
+        }
+    }
+
+    /**
+     * Needs the mTimeStamp
+     */
+    public void insertURLsIntoDbs()
+    {
+     //   boolean value = dbs.insertURLs(mStringBlocks, mTimestamp.toString());
     }
 
     public static Intent newIntent(Context packageContext, String[] stringList) {
