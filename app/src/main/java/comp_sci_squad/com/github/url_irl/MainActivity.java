@@ -17,8 +17,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Display;
+import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -48,7 +51,7 @@ public class MainActivity extends Activity implements
      * Defines the transformations that align camera orientation with
      * device orientation per each angle.
      */
-    private final float[] OFFSET = {90.0f, 0.0f, -90.0f, -180.0f};
+    private final float[] OFFSET = {90.0f, 180.0f, -90.0f, 0.0f};
     final int INDEX_OFFSET_AT_0 = 0;
     final int INDEX_OFFSET_AT_90 = 1;
     final int INDEX_OFFSET_AT_180 = 2;
@@ -67,12 +70,15 @@ public class MainActivity extends Activity implements
     ProgressBar mProgressBar;
     MediaActionSound mShutterSound;
 
+    private MyOrientationEventListener mOrientationEventListener;
+    private int mLastOrientation = 0;
+    private float mLastRotation = 0.0f;
+
     /**
      * Emulator Variables. Remove before release.
      */
     ImageView mEmulatorPreview;
     Bitmap mEmulatorImage;
-
 
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
@@ -91,11 +97,10 @@ public class MainActivity extends Activity implements
                 @Override
                 public void onPictureTaken(CameraView cameraView, byte[] data) {
                     super.onPictureTaken(cameraView, data);
-
                     Log.d(TAG, "Picture taken");
 
-                    Display display = getWindowManager().getDefaultDisplay();
-                    Bitmap image = rotatePictureByOrientation(data, display.getRotation());
+                    Bitmap image = rotatePictureByOrientation(data, mLastOrientation);
+                    Log.d(TAG, "Converted image to text: ");
 
                     TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this,
                             System.currentTimeMillis());
@@ -179,12 +184,55 @@ public class MainActivity extends Activity implements
                             System.currentTimeMillis());
 
                     parsingTask.execute(mEmulatorImage);
-
                     mShutterButton.setEnabled(false);
                     break;
             }
         }
     };
+
+    public void onOrientationChanged(int orientation) {
+        //Calculate Difference from last Orientation
+        int diff = Math.abs(mLastOrientation * 90 - orientation);
+        diff = Math.min(diff, 360 - diff);
+
+        if (diff > 55) {
+            int newOrientation = Math.round(orientation/90.0f) % 4;
+            float newRotation = 0;
+
+            //Rotate animation forward, backward, or 180 depending on change in Orientation
+            if (newOrientation == (mLastOrientation + 1) % 4) {
+                Log.d(TAG, "Phone rotated clockwise");
+                newRotation = mLastRotation - 90.0f;
+            } else if (newOrientation == ((mLastOrientation + 3) % 4)) {
+                Log.d(TAG, "Phone rotated counterclockwise");
+                newRotation = mLastRotation + 90.0f;
+            } else {
+                Log.d(TAG, "Phone flipped");
+                newRotation = mLastRotation + 180.0f;
+            }
+            Log.d(TAG, "Rotate Previous: " + mLastRotation + "   Rotate New: " + newRotation);
+
+            //Create Rotation Animation
+            RotateAnimation rotateAnimation = new RotateAnimation(
+                    mLastRotation,
+                    newRotation,
+                    RotateAnimation.RELATIVE_TO_SELF,
+                    0.5f,
+                    RotateAnimation.RELATIVE_TO_SELF,
+                    0.5f);
+            rotateAnimation.setInterpolator(new LinearInterpolator());
+            rotateAnimation.setDuration(250);
+            rotateAnimation.setFillAfter(true);
+
+            //Rotate the views
+            mShutterButton.startAnimation(rotateAnimation);
+
+            //Set variables for next iteration
+            mLastOrientation = newOrientation;
+            mLastRotation = newRotation;
+            Log.d(TAG, "Orientation Changed to: " + newOrientation);
+        }
+    }
 
     /**
      * Checks if the app is run on an emulator.
@@ -209,6 +257,8 @@ public class MainActivity extends Activity implements
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.v(TAG, "onCreate()");;
+
+        mOrientationEventListener = new MyOrientationEventListener(this);
 
         if(isEmulator()) {
             Log.w(TAG, "Emulator display. Remove before release.");
@@ -256,7 +306,12 @@ public class MainActivity extends Activity implements
     protected void onResume() {
         super.onResume();
         Log.v(TAG, "onResume()");
-
+        if (mOrientationEventListener.canDetectOrientation()) {
+            Log.v(TAG, "Orientation Event Listener can detect orientation");
+            mOrientationEventListener.enable();
+        } else {
+            Log.d(TAG, "Orientation Event Listener cannot detect orientation");
+        }
         if (mCamera != null)
             mCamera.start();
         Log.v(TAG, "Camera Resumed");
@@ -267,7 +322,7 @@ public class MainActivity extends Activity implements
     @Override
     protected void onPause() {
         Log.v(TAG, "onPause()");
-
+        mOrientationEventListener.disable();
         if (mCamera != null)
             mCamera.stop();
         Log.v(TAG, "Camera Paused");
@@ -350,5 +405,21 @@ public class MainActivity extends Activity implements
         byte[] compressedByteArray = stream.toByteArray();
         Log.d(TAG, "Passing byte array thumbnail image of size: " + compressedByteArray.length);
         return stream.toByteArray();
+    }
+
+
+    private class MyOrientationEventListener
+            extends OrientationEventListener {
+        public MyOrientationEventListener(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onOrientationChanged(int orientation) {
+            if (orientation != MyOrientationEventListener.ORIENTATION_UNKNOWN) {
+                Log.v("Orientation", Integer.toString(orientation));
+                MainActivity.this.onOrientationChanged(orientation);
+            }
+        }
     }
 }
