@@ -16,9 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.Display;
 import android.view.OrientationEventListener;
-import android.view.Surface;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
@@ -46,30 +44,28 @@ public class MainActivity extends Activity implements
     public static final String TIME_EXTRA = "time";
 
     /**
-     * Rotation Offset Constants
-     *
-     * Defines the transformations that align camera orientation with
-     * device orientation per each angle.
-     */
-    private final float[] OFFSET = {90.0f, 180.0f, -90.0f, 0.0f};
-    final int INDEX_OFFSET_AT_0 = 0;
-    final int INDEX_OFFSET_AT_90 = 1;
-    final int INDEX_OFFSET_AT_180 = 2;
-    final int INDEX_OFFSET_AT_270 = 3;
-
-    /**
      * Logging Tag
      */
     private String TAG = "CAMERA_ACTIVITY";
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
+    /**
+     * UI Elements
+     */
     private CameraView mCamera;
+
 
     ImageButton mShutterButton;
     ProgressBar mProgressBar;
     MediaActionSound mShutterSound;
 
+    /**
+     * Orientation Private Variables
+     *
+     * MyOrientationEventListener extends OrientationEventListener and calls onOrientationChanged()
+     * if phone is rotated 55 degrees away from orientation
+     */
     private MyOrientationEventListener mOrientationEventListener;
     private int mLastOrientation = 0;
     private float mLastRotation = 0.0f;
@@ -80,6 +76,9 @@ public class MainActivity extends Activity implements
     ImageView mEmulatorPreview;
     Bitmap mEmulatorImage;
 
+    /**
+     * Callback for Camera View
+     */
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
                 @Override
@@ -94,6 +93,13 @@ public class MainActivity extends Activity implements
                     Log.d(TAG, "Camera Closed");
                 }
 
+                /**
+                 * Converts the byte array to a bitmap and rotates it.
+                 * The parsing library only takes bitmaps and frames.
+                 * It is parsed for text with an AsyncTask that handles the next steps
+                 * @param cameraView - A reference to the cameraView the picture was taken with
+                 * @param data - The taken picture as a byte array
+                 */
                 @Override
                 public void onPictureTaken(CameraView cameraView, byte[] data) {
                     super.onPictureTaken(cameraView, data);
@@ -109,21 +115,39 @@ public class MainActivity extends Activity implements
                 }
             };
 
+    /**
+     * This class parses images into text and starts ListUrlsActivity when done.
+     */
     protected class TextRecognitionTask extends AsyncTask<Bitmap, Integer, Intent> {
         private Context mContext;
         private long mTimeImageTaken;
 
+        /**
+         * Constructor sets context for creating intent.
+         * @param context - Main Activity's context.
+         * @param timeImageTaken - The time the picture was taken at as a long. System.currentTimeMillis().
+         */
         public TextRecognitionTask(Context context, long timeImageTaken) {
             mContext = context;
             mTimeImageTaken = timeImageTaken;
         }
 
+        /**
+         * Enables progress bar on UI thread before task starts.
+         * Called automatically by the AsyncTask.
+         */
         @Override
         protected void onPreExecute() {
             if (!isCancelled())
                 mProgressBar.setVisibility(View.VISIBLE);
         }
 
+        /**
+         * Called automatically by the AsyncTask.
+         * @param params Bitmap varargs array that is going to be parsed for text.
+         * @return Intent - Returns an intent to start ListUrlsActivity passing in the the string arraylist,
+         * the thumbnail, and the time.
+         */
         @Override
         protected Intent doInBackground(Bitmap... params) {
             Log.d(TAG, "URL Parsing Task Started");
@@ -144,6 +168,11 @@ public class MainActivity extends Activity implements
             return intent;
         }
 
+        /**
+         * Resets UI elements before starting ListUrlsActivity.
+         * Called automatically by the AsyncTask.
+         * @param intent - The intent doInBackground() returns.
+         */
         @Override
         protected void onPostExecute(Intent intent) {
             Log.d(TAG, "URL Parsing Task Ended.");
@@ -190,6 +219,16 @@ public class MainActivity extends Activity implements
         }
     };
 
+    /**
+     * Calculates the devices current rotation and compares to current orientation and updates UI accordingly.
+     * 
+     * If the difference is greater than 55 degrees it calculates new orientation and
+     * and creates an animation for the rotation of the UI elements.
+     * It then rotates the UI elements with that animation.
+     * Finally, it saves the new orientation and UI element rotation to member variables.
+     *
+     * @param orientation - The orientation of the device as an angle. Vertical is 0 clockwise to 359
+     */
     public void onOrientationChanged(int orientation) {
         //Calculate Difference from last Orientation
         int diff = Math.abs(mLastOrientation * 90 - orientation);
@@ -336,6 +375,13 @@ public class MainActivity extends Activity implements
         super.onDestroy();
     }
 
+    /**
+     * Keeps requesting camera permission til accepted.
+     * Once accepted, initialize the Camera View
+     * @param requestCode - The request code for permission. Only acts if its REQUEST_CAMERA_PERMISSION
+     * @param permissions - The requested permissions. Never null.
+     * @param grantResults - The grant results for the corresponding permissions which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -363,25 +409,7 @@ public class MainActivity extends Activity implements
      * @return Bitmap - a picture that is rotated properly according to the phone orientation.
      */
     private Bitmap rotatePictureByOrientation(byte[] imageData, int rotation) {
-        float rotationAmount = 0.0f; // Picture is sideways + camera rotation
-        switch (rotation) {
-            case Surface.ROTATION_0:
-                Log.d(TAG, "Rotation: 0");
-                rotationAmount = OFFSET[INDEX_OFFSET_AT_0];
-                break;
-            case Surface.ROTATION_90:
-                Log.d(TAG, "Rotation: 90");
-                rotationAmount = OFFSET[INDEX_OFFSET_AT_90];
-                break;
-            case Surface.ROTATION_180:
-                Log.d(TAG, "Rotation: 180");
-                rotationAmount = OFFSET[INDEX_OFFSET_AT_180];
-                break;
-            case Surface.ROTATION_270:
-                Log.d(TAG, "Rotation: 270");
-                rotationAmount = OFFSET[INDEX_OFFSET_AT_270];
-                break;
-        }
+        float rotationAmount = mLastOrientation * 90.0f + 90.0f;
 
         Matrix rotationMatrix = new Matrix();
         rotationMatrix.postRotate(rotationAmount);
@@ -394,10 +422,17 @@ public class MainActivity extends Activity implements
         return  img;
     }
 
+    /**
+     * Compresses a bitmap so its length and width are 1/8 the size
+     * Results in a 1/64th size image
+     *
+     * @param image - a bitmap
+     * @return byte[] - the compressed picture as a byte array
+     */
     private byte[] compressBitmap(Bitmap image) {
         Log.d(TAG, "Compressing thumbnail Bitmap");
-        int thumbnailHeight = image.getHeight()/8;
-        int thumbnailWidth = image.getWidth()/8;
+        int thumbnailHeight = image.getHeight()/getResources().getInteger(R.integer.THUMBNAIL_SHRINK_RATIO);
+        int thumbnailWidth = image.getWidth()/getResources().getInteger(R.integer.THUMBNAIL_SHRINK_RATIO);
         
         Bitmap scaled = Bitmap.createScaledBitmap(image, thumbnailWidth, thumbnailHeight, true);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -408,12 +443,21 @@ public class MainActivity extends Activity implements
     }
 
 
+    /**
+     * OrientationEventListener is abstract so this subclass extends it
+     */
     private class MyOrientationEventListener
             extends OrientationEventListener {
         public MyOrientationEventListener(Context context) {
             super(context);
         }
 
+
+        /**
+         * The orientationListener uses Android's Sensor Manager in the background
+         * It calls MainActivity's onOrientationChanged if the orientation isn't flat (ORIENTATION_UNKOWN)
+         * @param orientation - the orientation of the device as an angle. Vertical is 0 clockwise to 359
+         */
         @Override
         public void onOrientationChanged(int orientation) {
             if (orientation != MyOrientationEventListener.ORIENTATION_UNKNOWN) {
