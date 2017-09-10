@@ -66,13 +66,13 @@ public class MainActivity extends Activity implements
     ImageButton mShutterButton;
     ProgressBar mProgressBar;
     MediaActionSound mShutterSound;
+    ImageView mCapturedImagePreview;
 
     /**
      * Emulator Variables. Remove before release.
      */
     ImageView mEmulatorPreview;
     Bitmap mEmulatorImage;
-
 
     private CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
@@ -96,6 +96,10 @@ public class MainActivity extends Activity implements
 
                     Display display = getWindowManager().getDefaultDisplay();
                     Bitmap image = rotatePictureByOrientation(data, display.getRotation());
+
+                    // Displays the image to the user
+                    mCapturedImagePreview.setImageBitmap(image);
+                    mCapturedImagePreview.setVisibility(View.VISIBLE);
 
                     TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this,
                             System.currentTimeMillis());
@@ -144,23 +148,39 @@ public class MainActivity extends Activity implements
             Log.d(TAG, "URL Parsing Task Ended.");
             mProgressBar.setVisibility(View.INVISIBLE);
 
-            mShutterButton.setEnabled(true);
-
             startActivity(intent);
+
+            Log.d(TAG, "Resetting Views.");
+
+            // Resets the visibility of the views
+            if (isEmulator())
+                mEmulatorPreview.setVisibility(View.VISIBLE);
+            else
+                mCamera.setVisibility(View.VISIBLE);
+
+            mShutterButton.setEnabled(true);
+            mShutterButton.setVisibility(View.VISIBLE);
+            mCapturedImagePreview.setVisibility(View.GONE);
         }
     }
 
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.d(TAG, "Shutter Button Pressed");
+
             switch (v.getId()) {
                 case R.id.shutter_button:
                     if (mCamera != null) {
-                        Log.d(TAG, "Shutter Button Pressed");
-                        mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
-                        mCamera.takePicture();
-
                         mShutterButton.setEnabled(false);
+
+                        mCamera.takePicture();
+                        mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
+
+                        mCamera.setVisibility(View.GONE);
+                        mShutterButton.setVisibility(View.GONE);
+                    } else {
+                        Log.e(TAG, "Camera not instantiated.");
                     }
                     break;
             }
@@ -170,17 +190,24 @@ public class MainActivity extends Activity implements
     private View.OnClickListener mEmulatorOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.d(TAG, "Shutter Button Pressed");
+
             switch (v.getId()) {
                 case R.id.shutter_button:
-                    Log.d(TAG, "Shutter Button Pressed");
+                    // Remove views
+                    mShutterButton.setVisibility(View.GONE);
+                    mEmulatorPreview.setVisibility(View.GONE);
+
                     mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
+
+                    // Displays the image to the user
+                    mCapturedImagePreview.setImageBitmap(mEmulatorImage);
+                    mCapturedImagePreview.setVisibility(View.VISIBLE);
 
                     TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this,
                             System.currentTimeMillis());
 
                     parsingTask.execute(mEmulatorImage);
-
-                    mShutterButton.setEnabled(false);
                     break;
             }
         }
@@ -203,7 +230,6 @@ public class MainActivity extends Activity implements
                 || Build.MANUFACTURER.contains("Genymotion")
                 || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
                 || "google_sdk".equals(Build.PRODUCT);
-
     }
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -237,6 +263,8 @@ public class MainActivity extends Activity implements
 
         mShutterSound = new MediaActionSound();
         mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
+
+        mCapturedImagePreview = (ImageView) findViewById(R.id.image_preview);
     }
 
     /**
