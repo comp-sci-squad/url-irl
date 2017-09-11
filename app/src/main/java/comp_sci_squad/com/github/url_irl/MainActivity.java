@@ -60,8 +60,7 @@ public class MainActivity extends Activity implements
     /**
      * UI Elements
      */
-    private CameraView mCamera;
-
+    CameraView mCamera;
     ImageButton mShutterButton;
     ProgressBar mProgressBar;
     MediaActionSound mShutterSound;
@@ -81,8 +80,8 @@ public class MainActivity extends Activity implements
      * Emulator Variables. Remove before release.
      */
     ImageView mEmulatorPreview;
-    Bitmap mEmulatorImage;
-    boolean mEmulated;
+    private Bitmap mEmulatorImage;
+    private boolean mEmulated;
 
     /**
      * Callback for Camera View
@@ -130,7 +129,7 @@ public class MainActivity extends Activity implements
     /**
      * This class parses images into text and starts ListUrlsActivity when done.
      */
-    protected class TextRecognitionTask extends AsyncTask<Bitmap, Integer, Intent> {
+    private class TextRecognitionTask extends AsyncTask<Bitmap, Integer, Intent> {
         private Context mContext;
         private long mTimeImageTaken;
 
