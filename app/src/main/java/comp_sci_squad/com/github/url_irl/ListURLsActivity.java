@@ -29,6 +29,9 @@ import java.util.regex.Pattern;
 
 import comp_sci_squad.com.github.url_irl.utilities.FormattingUtils;
 
+import static comp_sci_squad.com.github.url_irl.MainActivity.PICTURE_EXTRA;
+import static comp_sci_squad.com.github.url_irl.MainActivity.TIME_EXTRA;
+
 public class ListURLsActivity extends AppCompatActivity implements UriAdapter.ListItemClickListener {
 
     /**
@@ -48,7 +51,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
      * Intent Extras
      */
     private ArrayList<String> mStringBlocks;
-    private byte[] urlScanImage;
+    private byte[] mURLScanThumbnail;
     private long mTimePictureTaken;
 
     /**
@@ -74,8 +77,8 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST))) {
             mStringBlocks = sourceIntent.getStringArrayListExtra(getString(R.string.URI_ARRAY_LIST));
 
-            urlScanImage = sourceIntent.getByteArrayExtra(MainActivity.PICTURE_EXTRA);
-            mTimePictureTaken = sourceIntent.getLongExtra(MainActivity.TIME_EXTRA, 0);
+            mURLScanThumbnail = sourceIntent.getByteArrayExtra(PICTURE_EXTRA);
+            mTimePictureTaken = sourceIntent.getLongExtra(TIME_EXTRA, 0);
         }
 
         //Set UI member variables and data storage elements
@@ -86,11 +89,8 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mTimestamp = (TextView) findViewById(R.id.timestamp);
         mTimestamp.setText(FormattingUtils.formatTimeStamp(mTimePictureTaken, getString(R.string.timestamp_format_pattern)));
-
-        if(!MainActivity.isEmulator()) {
-            mImageView = (ImageView) findViewById(R.id.image_thumbnail);
-            mImageView.setImageBitmap(BitmapFactory.decodeByteArray(urlScanImage, 0, urlScanImage.length));
-        }// if program was not ran on an emulator
+        mImageView = (ImageView) findViewById(R.id.image_thumbnail);
+        mImageView.setImageBitmap(BitmapFactory.decodeByteArray(mURLScanThumbnail, 0, mURLScanThumbnail.length));
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -145,13 +145,15 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     }
 
 
-    public static Intent newIntent(Context packageContext, ArrayList<String> stringList) {
+    public static Intent newIntent(Context packageContext, ArrayList<String> stringListExtra, byte[] thumbnailExtra, long timePictureTakenExtra) {
         Log.d(TAG, "Getting Intent");
 
-        Intent i = new Intent(packageContext, ListURLsActivity.class);
-        i.putExtra(packageContext.getString(R.string.URI_ARRAY_LIST), stringList);
+        Intent intent = new Intent(packageContext, ListURLsActivity.class);
+        intent.putExtra(packageContext.getString(R.string.URI_ARRAY_LIST), stringListExtra);
+        intent.putExtra(PICTURE_EXTRA, thumbnailExtra);
+        intent.putExtra(TIME_EXTRA, timePictureTakenExtra);
 
-        return i;
+        return intent;
     }
 
     /**
@@ -254,7 +256,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
         /**
          * Sets the list of URLs scanned to the UI.
-         * 
+         *
          * Sets the intent for the share all button with the URLs.
          * Gives all the URLs to the recycle view's adapter.
          * Called automatically by the async task.

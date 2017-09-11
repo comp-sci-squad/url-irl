@@ -161,9 +161,7 @@ public class MainActivity extends Activity implements
                 compressedImage = compressBitmap(image);
             }
 
-            Intent intent = ListURLsActivity.newIntent(mContext, result);
-            intent.putExtra(PICTURE_EXTRA, compressedImage);
-            intent.putExtra(TIME_EXTRA, mTimeImageTaken);
+            Intent intent = ListURLsActivity.newIntent(mContext, result, compressedImage, mTimeImageTaken);
 
             return intent;
         }
