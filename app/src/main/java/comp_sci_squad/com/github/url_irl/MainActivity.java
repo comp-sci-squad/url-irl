@@ -82,6 +82,7 @@ public class MainActivity extends Activity implements
      */
     ImageView mEmulatorPreview;
     Bitmap mEmulatorImage;
+    boolean mEmulated;
 
     /**
      * Callback for Camera View
@@ -204,43 +205,27 @@ public class MainActivity extends Activity implements
 
             switch (v.getId()) {
                 case R.id.shutter_button:
-                    if (mCamera != null) {
+                    if (mCamera != null || mEmulatorPreview != null) {
                         mShutterButton.setEnabled(false);
 
-                        mCamera.takePicture();
+                        if (mEmulated)
+                            mCapturedImagePreview.setImageBitmap(mEmulatorImage);
+                        else
+                            mCamera.takePicture();
+
                         mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
 
                         takePictureAnimation();
 
-                        mCamera.setVisibility(View.GONE);
-                        mShutterButton.setVisibility(View.GONE);
+                        if (mEmulated) {
+                            TextRecognitionTask parsingTask = new TextRecognitionTask(
+                                    MainActivity.this, System.currentTimeMillis());
+                            parsingTask.execute(mEmulatorImage);
+                        }
+
                     } else {
                         Log.e(TAG, "Camera not instantiated.");
                     }
-                    break;
-            }
-        }
-    };
-
-    private View.OnClickListener mEmulatorOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Log.d(TAG, "Shutter Button Pressed");
-
-            switch (v.getId()) {
-                case R.id.shutter_button:
-                    mShutterButton.setEnabled(false);
-
-                    mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
-
-                    mCapturedImagePreview.setImageBitmap(mEmulatorImage);
-
-                    takePictureAnimation();
-
-                    TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this,
-                            System.currentTimeMillis());
-
-                    parsingTask.execute(mEmulatorImage);
                     break;
             }
         }
@@ -325,50 +310,47 @@ public class MainActivity extends Activity implements
 
         mOrientationEventListener = new MyOrientationEventListener(this);
 
-        if(isEmulator()) {
-            Log.w(TAG, "Emulator display. Remove before release.");
-            setContentView(R.layout.emulator_main_activity);
+        mEmulated = isEmulator();
+        setContentView(mEmulated ? R.layout.emulator_main_activity: R.layout.activity_main);
 
-            InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
-            mEmulatorImage = BitmapFactory.decodeStream(stream);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new
+                    String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+        } else {
+            if (!mEmulated) {
+                mCamera = (CameraView) findViewById(R.id.camera);
+                mCamera.addCallback(mCameraCallback);
+            } else {
+                Log.w(TAG, "Emulator display. Remove before release.");
 
-            mEmulatorPreview = (ImageView) findViewById(R.id.emulator_image);
-            mEmulatorPreview.setImageBitmap(mEmulatorImage);
+                InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
+                mEmulatorImage = BitmapFactory.decodeStream(stream);
+
+                mEmulatorPreview = (ImageView) findViewById(R.id.emulator_image);
+                mEmulatorPreview.setImageBitmap(mEmulatorImage);
+            }
 
             mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
-            mShutterButton.setOnClickListener(mEmulatorOnClickListener);
+            mShutterButton.setOnClickListener(mOnClickListener);
 
             mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
-        } else {
-            setContentView(R.layout.activity_main);
 
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(MainActivity.this, new
-                        String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-            } else
-                inflateViews();
+            mShutterSound = new MediaActionSound();
+            mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
+
+            mCapturedImagePreview = (ImageView) findViewById(R.id.image_preview);
+
+            mShortAnimationDuration = getResources().getInteger(
+                    android.R.integer.config_shortAnimTime);
         }
-
-        mShutterSound = new MediaActionSound();
-        mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
-
-        mCapturedImagePreview = (ImageView) findViewById(R.id.image_preview);
-
-        mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
     }
 
     /**
      * Associates view variables with their layout counterparts.
      */
     private void inflateViews() {
-        mCamera = (CameraView) findViewById(R.id.camera);
-        mCamera.addCallback(mCameraCallback);
 
-        mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
-        mShutterButton.setOnClickListener(mOnClickListener);
-
-        mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
     }
 
     @Override
@@ -481,7 +463,6 @@ public class MainActivity extends Activity implements
             super(context);
         }
 
-
         /**
          * The orientationListener uses Android's Sensor Manager in the background
          * It calls MainActivity's onOrientationChanged if the orientation isn't flat (ORIENTATION_UNKOWN)
@@ -502,7 +483,7 @@ public class MainActivity extends Activity implements
      * with the {@link #undoPictureAnimationChanges()} before starting a new activity.
      */
     private void takePictureAnimation() {
-        final View cameraLikeView = isEmulator() ? mEmulatorPreview : mCamera;
+        final View cameraLikeView = mEmulated ? mEmulatorPreview : mCamera;
 
         mCapturedImagePreview.setAlpha(0f);
         mCapturedImagePreview.setVisibility(View.VISIBLE);
@@ -540,7 +521,7 @@ public class MainActivity extends Activity implements
      * Undoes the changes made by the {@link #takePictureAnimation()}.
      */
     private void undoPictureAnimationChanges() {
-        View cameraLikeView = isEmulator() ? mEmulatorPreview : mCamera;
+        View cameraLikeView = mEmulated ? mEmulatorPreview : mCamera;
 
         cameraLikeView.setVisibility(View.VISIBLE);
         mShutterButton.setVisibility(View.VISIBLE);
