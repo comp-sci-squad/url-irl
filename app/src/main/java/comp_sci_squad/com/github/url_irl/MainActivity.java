@@ -52,6 +52,9 @@ public class MainActivity extends Activity implements
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
+    /**
+     * Duration of the picture taken animation. Set to system's default short animation time.
+     */
     private int mShortAnimationDuration;
 
     /**
