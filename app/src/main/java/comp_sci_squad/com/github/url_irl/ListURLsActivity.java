@@ -31,42 +31,61 @@ import comp_sci_squad.com.github.url_irl.utilities.FormattingUtils;
 
 public class ListURLsActivity extends AppCompatActivity implements UriAdapter.ListItemClickListener {
 
+    /**
+     * Logging Tag
+     */
     private static final String TAG = "ListURLSActivity";
-    private UriAdapter mAdapter;
-    private RecyclerView recyclerView;
-    private ArrayList<String> mStringBlocks;
+
+    /**
+     * UI Elements
+     */
     private ProgressBar mLoadingIndicator;
     private ImageView mImageView;
-    private byte[] urlScanImage;
     private Toolbar mToolBar;
     private TextView mTimestamp;
+
+    /**
+     * Intent Extras
+     */
+    private ArrayList<String> mStringBlocks;
+    private byte[] urlScanImage;
+    private long mTimePictureTaken;
+
+    /**
+     * Data Storage Elements
+     */
+    private UriAdapter mAdapter;
+    private RecyclerView recyclerView;
+
+    /**
+     * Sharing
+     */
     private ShareActionProvider mShareActionProvider;
-    private Intent shareIntent;
+    private Intent mShareIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_urls);
-        mToolBar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolBar);
+        Log.d(TAG, "onCreate()");
 
-
-
-        Log.d(TAG, "On create " + TAG);
-        long timePictureTaken = 0;
+        //Get member variables from intent
         Intent sourceIntent = getIntent();
         if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST))) {
             mStringBlocks = sourceIntent.getStringArrayListExtra(getString(R.string.URI_ARRAY_LIST));
 
             urlScanImage = sourceIntent.getByteArrayExtra(MainActivity.PICTURE_EXTRA);
-            timePictureTaken = sourceIntent.getLongExtra(MainActivity.TIME_EXTRA, 0);
+            mTimePictureTaken = sourceIntent.getLongExtra(MainActivity.TIME_EXTRA, 0);
         }
 
-        Log.d(TAG, "Creating Recycler view, progress bar, layout manager, and URIADapter");
+        //Set UI member variables and data storage elements
+        Log.d(TAG, "Assigning Member variables");
+        mToolBar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolBar);
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mTimestamp = (TextView) findViewById(R.id.timestamp);
-        mTimestamp.setText(FormattingUtils.formatTimeStamp(timePictureTaken, getString(R.string.timestamp_format_pattern)));
+        mTimestamp.setText(FormattingUtils.formatTimeStamp(mTimePictureTaken, getString(R.string.timestamp_format_pattern)));
 
         if(!MainActivity.isEmulator()) {
             mImageView = (ImageView) findViewById(R.id.image_thumbnail);
@@ -90,6 +109,8 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     /**
      * Create an options menu. It will create
      *  - Share All Button
+     * @param menu - The Options Menu being created.
+     * @return - True because it handled the menu creation.
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -98,13 +119,19 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         return true;
     }
 
+    /**
+     * Handles menu items being selected.
+     * If the item was share_all, start the share chooser with all the urls.
+     * @param item - The item selected.
+     * @return - Returns true if successfully handled or calls super method.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.share_all:
                 // Share the URLS
-                if (shareIntent != null)
-                    startActivity(Intent.createChooser(shareIntent, "Share using"));
+                if (mShareIntent != null)
+                    startActivity(Intent.createChooser(mShareIntent, "Share using"));
                 else
                     Log.e(TAG, "Share intent was null");
                 return true;
@@ -117,6 +144,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         }
     }
 
+
     public static Intent newIntent(Context packageContext, ArrayList<String> stringList) {
         Log.d(TAG, "Getting Intent");
 
@@ -126,6 +154,10 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         return i;
     }
 
+    /**
+     * Opens the link that is clicked on.
+     * @param clickedItemIndex - The adapter position of the url that is clicked on.
+     */
     @Override
     public void onListItemClick(int clickedItemIndex) {
         Log.d(TAG, "onListItemClick");
@@ -133,16 +165,24 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         startActivity(i);
     }
 
+    /**
+     * Creates a sharing chooser for the link that of the button that was clicked on.
+     * @param clickedItemIndex - The adapter position of the url that is clicked on.
+     */
     @Override
     public void onShareButtonClick(int clickedItemIndex) {
         Log.d(TAG, "onShareButtonClick");
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
-        //shareIntent.putExtra(Intent.EXTRA_SUBJECT, "R.string.sharing_url_subject");
+        //mShareIntent.putExtra(Intent.EXTRA_SUBJECT, "R.string.sharing_url_subject");
         shareIntent.putExtra(Intent.EXTRA_TEXT, mAdapter.getUri(clickedItemIndex).toString());
         startActivity(Intent.createChooser(shareIntent, getString(R.string.share_label)));
     }
 
+    /**
+     * Opens a google search with the query being the link of the button that was clicked on.
+     * @param clickedItemIndex - The adapter position of the url that is clicked on.
+     */
     @Override
     public void onSearchButtonClick(int clickedItemIndex) {
         Log.d(TAG, "onSearchButtonClick");
@@ -152,6 +192,10 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         startActivity(searchIntent);
     }
 
+    /**
+     * Copies the link that was long clicked on to the clipboard.
+     * @param clickedItemIndex - The adapter position of the url that is clicked on.
+     */
     @Override
     public void onListItemLongClick(int clickedItemIndex) {
         ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
@@ -178,6 +222,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
          *
          *   As a precondition: a url in the text MUST have spaces before and after it.
          *   as URLs rules allow very diverse strings.
+         *   Called automatically by the async task.
          *
          *   @param textBlocks the blocks of text to parse for urls.
          *   @return ArrayList<String> List of urls.
@@ -207,6 +252,15 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
             return urls;
         }
 
+        /**
+         * Sets the list of URLs scanned to the UI.
+         * 
+         * Sets the intent for the share all button with the URLs.
+         * Gives all the URLs to the recycle view's adapter.
+         * Called automatically by the async task.
+         *
+         * @param urls - An arraylist of parsed urls prepended with http://
+         */
         @Override
         protected void onPostExecute(ArrayList<Uri> urls) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
@@ -214,10 +268,10 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
             String shareString = "";
             for (Uri uri : urls)
                 shareString += uri.toString() + "\n";
-            shareIntent = new Intent();
-            shareIntent.setAction(Intent.ACTION_SEND);
-            shareIntent.putExtra(Intent.EXTRA_TEXT, shareString);
-            shareIntent.setType("text/plain");
+            mShareIntent = new Intent();
+            mShareIntent.setAction(Intent.ACTION_SEND);
+            mShareIntent.putExtra(Intent.EXTRA_TEXT, shareString);
+            mShareIntent.setType("text/plain");
 
             Toast.makeText(getApplicationContext(), "Loaded " + urls.size() + " URLS", Toast.LENGTH_SHORT).show();
             mAdapter.setArray(urls);
