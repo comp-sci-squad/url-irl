@@ -317,39 +317,39 @@ public class MainActivity extends Activity implements
             ActivityCompat.requestPermissions(MainActivity.this, new
                     String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
         } else {
-            if (!mEmulated) {
-                mCamera = (CameraView) findViewById(R.id.camera);
-                mCamera.addCallback(mCameraCallback);
-            } else {
-                Log.w(TAG, "Emulator display. Remove before release.");
-
-                InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
-                mEmulatorImage = BitmapFactory.decodeStream(stream);
-
-                mEmulatorPreview = (ImageView) findViewById(R.id.emulator_image);
-                mEmulatorPreview.setImageBitmap(mEmulatorImage);
-            }
-
-            mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
-            mShutterButton.setOnClickListener(mOnClickListener);
-
-            mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
-
-            mShutterSound = new MediaActionSound();
-            mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
-
-            mCapturedImagePreview = (ImageView) findViewById(R.id.image_preview);
-
-            mShortAnimationDuration = getResources().getInteger(
-                    android.R.integer.config_shortAnimTime);
+            setUpCameraViews();
         }
     }
 
     /**
      * Associates view variables with their layout counterparts.
      */
-    private void inflateViews() {
+    private void setUpCameraViews() {
+        if (!mEmulated) {
+            mCamera = (CameraView) findViewById(R.id.camera);
+            mCamera.addCallback(mCameraCallback);
+        } else {
+            Log.w(TAG, "Emulator display. Remove before release.");
 
+            InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
+            mEmulatorImage = BitmapFactory.decodeStream(stream);
+
+            mEmulatorPreview = (ImageView) findViewById(R.id.emulator_image);
+            mEmulatorPreview.setImageBitmap(mEmulatorImage);
+        }
+
+        mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
+        mShutterButton.setOnClickListener(mOnClickListener);
+
+        mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
+
+        mShutterSound = new MediaActionSound();
+        mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
+
+        mCapturedImagePreview = (ImageView) findViewById(R.id.image_preview);
+
+        mShortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
     }
 
     @Override
@@ -381,7 +381,8 @@ public class MainActivity extends Activity implements
 
     @Override
     protected void onDestroy() {
-        mShutterSound.release();
+        if (mShutterSound != null)
+            mShutterSound.release();
         Log.v(TAG, "onDestroy()");
         super.onDestroy();
     }
@@ -401,7 +402,7 @@ public class MainActivity extends Activity implements
                 Log.d(TAG, "Permissions Result for Camera");
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d(TAG, "Request Successful");
-                    inflateViews();
+                    setUpCameraViews();
                 } else {
                     Log.d(TAG, "Permission for camera denied");
                     ActivityCompat.requestPermissions(MainActivity.this,
