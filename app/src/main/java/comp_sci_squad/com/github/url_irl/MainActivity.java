@@ -33,6 +33,12 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
+    // Constant strings for flash options
+    private static final int[] FLASH_OPTIONS = {
+            CameraView.FLASH_AUTO,
+            CameraView.FLASH_OFF,
+            CameraView.FLASH_ON,
+    };
     /**
      * Extra Name Constants for the ListURLsActivity Intent
      *
@@ -59,10 +65,12 @@ public class MainActivity extends Activity implements
      */
     private String TAG = "CAMERA_ACTIVITY";
 
+    // Current flash option
+    private int mCurrentFlashOption;
+
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
     private CameraView mCamera;
-
     ImageButton mShutterButton;
     ImageButton mFlashButton;
     ProgressBar mProgressBar;
@@ -133,7 +141,7 @@ public class MainActivity extends Activity implements
                 compressedImage = compressBitmap(image);
             }
 
-            Intent intent = ListURLsActivity.newIntent(mContext, result);
+            Intent intent = ListURLsActivity.newIntent(mContext, result.toArray(new String[result.size()]));
             intent.putExtra(PICTURE_EXTRA, compressedImage);
             intent.putExtra(TIME_EXTRA, mTimeImageTaken);
 
@@ -163,6 +171,12 @@ public class MainActivity extends Activity implements
                         mCamera.takePicture();
 
                         mShutterButton.setEnabled(false);
+                    }
+                case R.id.flashlight_button:
+                    if (mCamera != null) {
+                        Log.d(TAG, "Flash Button Pressed");
+                        mCurrentFlashOption = (mCurrentFlashOption + 1) % FLASH_OPTIONS.length;
+                        mCamera.setFlash(FLASH_OPTIONS[mCurrentFlashOption]);
                     }
                     break;
 
@@ -226,6 +240,9 @@ public class MainActivity extends Activity implements
             mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
             mShutterButton.setOnClickListener(mEmulatorOnClickListener);
 
+            mFlashButton = (ImageButton) findViewById(R.id.flashlight_button);
+            mFlashButton.setOnClickListener(mOnClickListener);
+
             mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
         } else {
             setContentView(R.layout.activity_main);
@@ -236,6 +253,8 @@ public class MainActivity extends Activity implements
                         String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
             } else
                 inflateViews();
+
+            mCurrentFlashOption = CameraView.FLASH_OFF;
         }
 
         mShutterSound = new MediaActionSound();
@@ -251,6 +270,9 @@ public class MainActivity extends Activity implements
 
         mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
         mShutterButton.setOnClickListener(mOnClickListener);
+
+        mFlashButton = (ImageButton) findViewById(R.id.flashlight_button);
+        mFlashButton.setOnClickListener(mOnClickListener);
 
         mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
     }
