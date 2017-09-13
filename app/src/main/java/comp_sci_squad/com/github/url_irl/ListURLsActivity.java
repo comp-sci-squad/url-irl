@@ -29,68 +29,49 @@ import java.util.regex.Pattern;
 
 import comp_sci_squad.com.github.url_irl.utilities.FormattingUtils;
 
-import static comp_sci_squad.com.github.url_irl.MainActivity.PICTURE_EXTRA;
-import static comp_sci_squad.com.github.url_irl.MainActivity.TIME_EXTRA;
-
 public class ListURLsActivity extends AppCompatActivity implements UriAdapter.ListItemClickListener {
 
-    /**
-     * Logging Tag
-     */
     private static final String TAG = "ListURLSActivity";
-
-    /**
-     * UI Elements
-     */
-    private ProgressBar mLoadingIndicator;
-    private ImageView mImageView;
-    private Toolbar mToolBar;
-    private TextView mTimestamp;
-
-    /**
-     * Intent Extras
-     */
-    private ArrayList<String> mStringBlocks;
-    private byte[] mURLScanThumbnail;
-    private long mTimePictureTaken;
-
-    /**
-     * Data Storage Elements
-     */
     private UriAdapter mAdapter;
     private RecyclerView recyclerView;
-
-    /**
-     * Sharing
-     */
+    private ArrayList<String> mStringBlocks;
+    private ProgressBar mLoadingIndicator;
+    private ImageView mImageView;
+    private byte[] urlScanImage;
+    private Toolbar mToolBar;
+    private TextView mTimestamp;
     private ShareActionProvider mShareActionProvider;
-    private Intent mShareIntent;
+    private Intent shareIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_urls);
-        Log.d(TAG, "onCreate()");
+        mToolBar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolBar);
 
-        //Get member variables from intent
+
+
+        Log.d(TAG, "On create " + TAG);
+        long timePictureTaken = 0;
         Intent sourceIntent = getIntent();
         if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST))) {
             mStringBlocks = sourceIntent.getStringArrayListExtra(getString(R.string.URI_ARRAY_LIST));
 
-            mURLScanThumbnail = sourceIntent.getByteArrayExtra(PICTURE_EXTRA);
-            mTimePictureTaken = sourceIntent.getLongExtra(TIME_EXTRA, 0);
+            urlScanImage = sourceIntent.getByteArrayExtra(MainActivity.PICTURE_EXTRA);
+            timePictureTaken = sourceIntent.getLongExtra(MainActivity.TIME_EXTRA, 0);
         }
 
-        //Set UI member variables and data storage elements
-        Log.d(TAG, "Assigning Member variables");
-        mToolBar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolBar);
+        Log.d(TAG, "Creating Recycler view, progress bar, layout manager, and URIADapter");
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mTimestamp = (TextView) findViewById(R.id.timestamp);
-        mTimestamp.setText(FormattingUtils.formatTimeStamp(mTimePictureTaken, getString(R.string.timestamp_format_pattern)));
-        mImageView = (ImageView) findViewById(R.id.image_thumbnail);
-        mImageView.setImageBitmap(BitmapFactory.decodeByteArray(mURLScanThumbnail, 0, mURLScanThumbnail.length));
+        mTimestamp.setText(FormattingUtils.formatTimeStamp(timePictureTaken, getString(R.string.timestamp_format_pattern)));
+
+        if(!MainActivity.isEmulator()) {
+            mImageView = (ImageView) findViewById(R.id.image_thumbnail);
+            mImageView.setImageBitmap(BitmapFactory.decodeByteArray(urlScanImage, 0, urlScanImage.length));
+        }// if program was not ran on an emulator
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -109,8 +90,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     /**
      * Create an options menu. It will create
      *  - Share All Button
-     * @param menu - The Options Menu being created.
-     * @return - True because it handled the menu creation.
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -119,19 +98,13 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         return true;
     }
 
-    /**
-     * Handles menu items being selected.
-     * If the item was share_all, start the share chooser with all the urls.
-     * @param item - The item selected.
-     * @return - Returns true if successfully handled or calls super method.
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.share_all:
                 // Share the URLS
-                if (mShareIntent != null)
-                    startActivity(Intent.createChooser(mShareIntent, "Share using"));
+                if (shareIntent != null)
+                    startActivity(Intent.createChooser(shareIntent, "Share using"));
                 else
                     Log.e(TAG, "Share intent was null");
                 return true;
@@ -144,22 +117,15 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         }
     }
 
-
-    public static Intent newIntent(Context packageContext, ArrayList<String> stringListExtra, byte[] thumbnailExtra, long timePictureTakenExtra) {
+    public static Intent newIntent(Context packageContext, ArrayList<String> stringList) {
         Log.d(TAG, "Getting Intent");
 
-        Intent intent = new Intent(packageContext, ListURLsActivity.class);
-        intent.putExtra(packageContext.getString(R.string.URI_ARRAY_LIST), stringListExtra);
-        intent.putExtra(PICTURE_EXTRA, thumbnailExtra);
-        intent.putExtra(TIME_EXTRA, timePictureTakenExtra);
+        Intent i = new Intent(packageContext, ListURLsActivity.class);
+        i.putExtra(packageContext.getString(R.string.URI_ARRAY_LIST), stringList);
 
-        return intent;
+        return i;
     }
 
-    /**
-     * Opens the link that is clicked on.
-     * @param clickedItemIndex - The adapter position of the url that is clicked on.
-     */
     @Override
     public void onListItemClick(int clickedItemIndex) {
         Log.d(TAG, "onListItemClick");
@@ -167,24 +133,16 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         startActivity(i);
     }
 
-    /**
-     * Creates a sharing chooser for the link that of the button that was clicked on.
-     * @param clickedItemIndex - The adapter position of the url that is clicked on.
-     */
     @Override
     public void onShareButtonClick(int clickedItemIndex) {
         Log.d(TAG, "onShareButtonClick");
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
-        //mShareIntent.putExtra(Intent.EXTRA_SUBJECT, "R.string.sharing_url_subject");
+        //shareIntent.putExtra(Intent.EXTRA_SUBJECT, "R.string.sharing_url_subject");
         shareIntent.putExtra(Intent.EXTRA_TEXT, mAdapter.getUri(clickedItemIndex).toString());
         startActivity(Intent.createChooser(shareIntent, getString(R.string.share_label)));
     }
 
-    /**
-     * Opens a google search with the query being the link of the button that was clicked on.
-     * @param clickedItemIndex - The adapter position of the url that is clicked on.
-     */
     @Override
     public void onSearchButtonClick(int clickedItemIndex) {
         Log.d(TAG, "onSearchButtonClick");
@@ -194,10 +152,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         startActivity(searchIntent);
     }
 
-    /**
-     * Copies the link that was long clicked on to the clipboard.
-     * @param clickedItemIndex - The adapter position of the url that is clicked on.
-     */
     @Override
     public void onListItemLongClick(int clickedItemIndex) {
         ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
@@ -224,12 +178,11 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
          *
          *   As a precondition: a url in the text MUST have spaces before and after it.
          *   as URLs rules allow very diverse strings.
-         *   Called automatically by the async task.
          *
          *   @param textBlocks the blocks of text to parse for urls.
          *   @return ArrayList<String> List of urls.
          */
-        @Override   
+        @Override
         protected ArrayList<Uri> doInBackground(String... textBlocks) {
             ArrayList<Uri> urls = new ArrayList<>();
 
@@ -254,15 +207,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
             return urls;
         }
 
-        /**
-         * Sets the list of URLs scanned to the UI.
-         *
-         * Sets the intent for the share all button with the URLs.
-         * Gives all the URLs to the recycle view's adapter.
-         * Called automatically by the async task.
-         *
-         * @param urls - An arraylist of parsed urls prepended with http://
-         */
         @Override
         protected void onPostExecute(ArrayList<Uri> urls) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
@@ -270,10 +214,10 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
             String shareString = "";
             for (Uri uri : urls)
                 shareString += uri.toString() + "\n";
-            mShareIntent = new Intent();
-            mShareIntent.setAction(Intent.ACTION_SEND);
-            mShareIntent.putExtra(Intent.EXTRA_TEXT, shareString);
-            mShareIntent.setType("text/plain");
+            shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareString);
+            shareIntent.setType("text/plain");
 
             Toast.makeText(getApplicationContext(), "Loaded " + urls.size() + " URLS", Toast.LENGTH_SHORT).show();
             mAdapter.setArray(urls);

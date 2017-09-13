@@ -1,7 +1,5 @@
 package comp_sci_squad.com.github.url_irl.utilities;
 
-import android.content.Context;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
