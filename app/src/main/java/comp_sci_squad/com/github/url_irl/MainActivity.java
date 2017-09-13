@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.MediaActionSound;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,11 +21,9 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.widget.ImageButton;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import android.os.AsyncTask;
 
 import com.google.android.cameraview.CameraView;
 
@@ -65,6 +64,7 @@ public class MainActivity extends Activity implements
     private CameraView mCamera;
 
     ImageButton mShutterButton;
+    ImageButton mFlashButton;
     ProgressBar mProgressBar;
     MediaActionSound mShutterSound;
 
@@ -146,6 +146,7 @@ public class MainActivity extends Activity implements
             mProgressBar.setVisibility(View.INVISIBLE);
 
             mShutterButton.setEnabled(true);
+            mFlashButton.setEnabled(true);
 
             startActivity(intent);
         }
@@ -164,6 +165,7 @@ public class MainActivity extends Activity implements
                         mShutterButton.setEnabled(false);
                     }
                     break;
+
             }
         }
     };
