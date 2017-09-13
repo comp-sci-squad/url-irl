@@ -20,7 +20,7 @@
         <activity android:name=".MainActivity"
                   android:label="@string/title_activity_camera_viewer"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
-                  android:screenOrientation="fullSensor">
+                  android:screenOrientation="locked">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -10,8 +10,16 @@ import java.util.Date;
  */
 
 public class FormattingUtils {
-    public static String  formatTimeStamp(long dateInMillis, String dateFormat) {
+    /**
+     * Creates a formatted time stamp.
+     * Used in ListURLSActivity.
+     *
+     * @param timeInMillis - The time in milliseconds.
+     * @param dateFormat - The date format as a SimpleDateFormat string.
+     * @return - Returns the formatted timestamp string.
+     */
+    public static String formatTimeStamp(long timeInMillis, String dateFormat) {
         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-        return formatter.format(new Date(dateInMillis));
+        return formatter.format(new Date(timeInMillis));
     }
 }

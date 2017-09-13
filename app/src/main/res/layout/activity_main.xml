@@ -5,7 +5,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:background="@android:color/white">
 
     <com.google.android.cameraview.CameraView
         android:id="@+id/camera"
@@ -20,9 +21,16 @@
 
     </com.google.android.cameraview.CameraView>
 
+    <ImageView
+        android:id="@+id/image_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:scaleType="centerCrop"/>
+
     <ProgressBar
         android:id="@+id/loading_indicator"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginRight="8dp"

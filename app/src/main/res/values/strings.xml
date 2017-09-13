@@ -1,10 +1,10 @@
 <resources>
-    //App stuff
+    <!-- App stuff -->
     <string name="app_name">URL_IRL</string>
     <string name="title_activity_camera_viewer">URL_IRL</string>
     <string name="title_activity_list_urls">Urls Found</string>
 
-    //Cameraview Activity
+    <!-- Cameraview Activity -->
     <string name="photo_prompt">Take a picture!</string>
     <string name="action_settings">Share all URLs</string>
     <string name="camera_prompt">"Take a picture of a website address"</string>
@@ -12,11 +12,11 @@
     <string name="low_storage_error">Text detector dependencies cannot be downloaded due to low device storage</string>
     <string name="list_toast"> hello </string>
 
-    //List Urls Activity
+    <!-- List Urls Activity -->
     <string name="URI_ARRAY_LIST">comp_sci_squad.com.github.url_irl.uri_array_true</string>
     <string name="string_number_of_strings">Number of Strings in List: </string>
     <string name="strings_list">List: </string>
-    <string name="list_urls_title">Scanned URLS:</string>
+    <string name="list_urls_title">Scanned URLs</string>
     <string name="sharing_url_subject">Sharing URL:</string>
     <string name="share_label">Share</string>
     <string name="search_label">Search</string>
