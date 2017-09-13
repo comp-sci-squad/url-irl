@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.media.MediaActionSound;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,10 +28,18 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.os.AsyncTask;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.cameraview.CameraView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 
 public class MainActivity extends Activity implements
@@ -105,13 +115,19 @@ public class MainActivity extends Activity implements
                     super.onPictureTaken(cameraView, data);
                     Log.d(TAG, "Picture taken");
 
-                    Bitmap image = rotatePictureByOrientation(data, mLastOrientation);
-                    Log.d(TAG, "Converted image to text: ");
+                    Log.d(TAG, "Converting image to bitmap");
+                    RequestOptions options = new RequestOptions();
+                    options.transform(new RotateTransformation(90.0f * mLastOrientation + 90.0f));
+                    Glide.with(getApplicationContext()).asBitmap().load(data).apply(options).into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap image, Transition<? super Bitmap> transition) {
+                            Log.d(TAG, "Converting image to text: ");
+                            TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this,
+                                    System.currentTimeMillis());
 
-                    TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this,
-                            System.currentTimeMillis());
-
-                    parsingTask.execute(image);
+                            parsingTask.execute(image);
+                        }
+                    });
                 }
             };
 
@@ -152,14 +168,12 @@ public class MainActivity extends Activity implements
         protected Intent doInBackground(Bitmap... params) {
             Log.d(TAG, "URL Parsing Task Started");
             ArrayList<String> result = new ArrayList<>();
-            byte[] compressedImage = null;
 
-            for (Bitmap image : params) {
-                Log.d(TAG, "Converted image to text: ");
+            result.addAll(ImageToString.getTextFromPage(mContext, params[0]));
+            Log.d(TAG, "Converted image to text: ");
 
-                result.addAll(ImageToString.getTextFromPage(mContext, image));
-                compressedImage = compressBitmap(image);
-            }
+
+            byte[] compressedImage = compressedImage = compressBitmap(params[0]);;
 
             Intent intent = ListURLsActivity.newIntent(mContext, result, compressedImage, mTimeImageTaken);
 
@@ -420,6 +434,38 @@ public class MainActivity extends Activity implements
         return  img;
     }
 
+    public class RotateTransformation extends BitmapTransformation {
+        private float mRotationAngle = 0.0f;
+        private static final int VERSION = 0;
+        private static final String ID = "comp_sci_squad.com.github.url_irl.MainActivity.RotateTransformation" + VERSION;
+        private final byte[] ID_BYTES = ID.getBytes(CHARSET);
+
+        public RotateTransformation(float rotationAngle) {
+            this.mRotationAngle = rotationAngle;
+        }
+
+        @Override
+        protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+            Bitmap result = pool.get(outWidth, outHeight, Bitmap.Config.ARGB_8888);
+            Matrix rotationMatrix = new Matrix();
+            rotationMatrix.postRotate(mRotationAngle);
+            if (result == null) {
+                result = Bitmap.createBitmap(outWidth, outHeight, Bitmap.Config.ARGB_8888);
+            }
+
+            Canvas canvas = new Canvas(result);
+            Paint paint = new Paint();
+            paint.setAlpha(128);
+            canvas.drawBitmap(toTransform, rotationMatrix, paint);
+
+            return result;
+        }
+
+        @Override
+        public void updateDiskCacheKey(MessageDigest messageDigest) {
+            messageDigest.update(ID_BYTES);
+        }
+    }
     /**
      * Compresses a bitmap so its length and width are 1/8 the size
      * Results in a 1/64th size image

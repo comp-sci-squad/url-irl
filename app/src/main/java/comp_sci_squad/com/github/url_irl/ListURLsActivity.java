@@ -23,6 +23,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -90,7 +92,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         mTimestamp = (TextView) findViewById(R.id.timestamp);
         mTimestamp.setText(FormattingUtils.formatTimeStamp(mTimePictureTaken, getString(R.string.timestamp_format_pattern)));
         mImageView = (ImageView) findViewById(R.id.image_thumbnail);
-        mImageView.setImageBitmap(BitmapFactory.decodeByteArray(mURLScanThumbnail, 0, mURLScanThumbnail.length));
+        Glide.with(getApplicationContext()).load(mURLScanThumbnail).into(mImageView);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
