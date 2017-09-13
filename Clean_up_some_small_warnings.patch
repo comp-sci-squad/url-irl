@@ -1,0 +1,33 @@
+Index: app/src/main/java/comp_sci_squad/com/github/url_irl/ListURLsActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/comp_sci_squad/com/github/url_irl/ListURLsActivity.java	(revision f34629d0782eaf5dfcf716b021471c43081a6693)
++++ app/src/main/java/comp_sci_squad/com/github/url_irl/ListURLsActivity.java	(revision )
+@@ -106,7 +106,6 @@
+     @Override
+     public void onSearchButtonClick(int clickedItemIndex) {
+         Log.d(TAG, "onSearchButtonClick");
+-        String googleSearchUrl = "https://www.google.com/search?q=";
+         Uri searchUri = Uri.parse("https://www.google.com/search?q=" + mAdapter.getUri(clickedItemIndex).getHost());
+         Intent searchIntent = new Intent(Intent.ACTION_VIEW, searchUri);
+         startActivity(searchIntent);
+Index: app/src/main/java/comp_sci_squad/com/github/url_irl/UriAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/comp_sci_squad/com/github/url_irl/UriAdapter.java	(revision f34629d0782eaf5dfcf716b021471c43081a6693)
++++ app/src/main/java/comp_sci_squad/com/github/url_irl/UriAdapter.java	(revision )
+@@ -46,9 +46,8 @@
+         boolean shouldAttachToParentImmediately = false;
+ 
+         View view = inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately);
+-        UriViewHolder viewHolder = new UriViewHolder(view);
+ 
+-        return viewHolder;
++        return new UriViewHolder(view);
+     }
+ 
+     public void onBindViewHolder(UriViewHolder holder, int position) {
