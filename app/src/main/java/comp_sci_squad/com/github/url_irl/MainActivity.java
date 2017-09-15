@@ -117,7 +117,7 @@ public class MainActivity extends Activity implements
 
                     Log.d(TAG, "Converting image to bitmap");
                     RequestOptions options = new RequestOptions();
-                    options.transform(new RotateTransformation(90.0f * mLastOrientation + 90.0f));
+                    options.transform(new RotateTransformation(90.0f * mLastOrientation));
                     Glide.with(getApplicationContext()).asBitmap().load(data).apply(options).into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(Bitmap image, Transition<? super Bitmap> transition) {
@@ -172,8 +172,7 @@ public class MainActivity extends Activity implements
             result.addAll(ImageToString.getTextFromPage(mContext, params[0]));
             Log.d(TAG, "Converted image to text: ");
 
-
-            byte[] compressedImage = compressedImage = compressBitmap(params[0]);;
+            byte[] compressedImage = compressBitmap(params[0]);;
 
             Intent intent = ListURLsActivity.newIntent(mContext, result, compressedImage, mTimeImageTaken);
 
@@ -446,11 +445,15 @@ public class MainActivity extends Activity implements
 
         @Override
         protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+            Log.d(TAG, "Transforming Bitmap by degrees: " + mRotationAngle);
             Bitmap result = pool.get(outWidth, outHeight, Bitmap.Config.ARGB_8888);
             Matrix rotationMatrix = new Matrix();
             rotationMatrix.postRotate(mRotationAngle);
             if (result == null) {
                 result = Bitmap.createBitmap(outWidth, outHeight, Bitmap.Config.ARGB_8888);
+                Log.d(TAG, "New bitmap created for transform.");
+            } else {
+                Log.d(TAG, "Bitmap reused from pool");
             }
 
             Canvas canvas = new Canvas(result);
