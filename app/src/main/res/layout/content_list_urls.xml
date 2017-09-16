@@ -1,49 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
+    app:cardBackgroundColor="@color/colorBackground"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="2dp"
+    app:cardMaxElevation="8dp"
+    app:cardPreventCornerOverlap="true"
+    android:layout_margin="1dp">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorBackground"
 >
 
-    <TextView
-        android:id="@+id/textViewUrl"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-light"
-        android:background="@drawable/url_selector"
-        android:textSize="20sp"
-        tools:text="www.google.com"
-        android:textColor="@android:color/black"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingBottom="4dp"
-        android:paddingTop="4dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        tools:layout_constraintTop_creator="1"
-        tools:layout_constraintRight_creator="1"
-        tools:layout_constraintLeft_creator="1"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/textViewUrl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:background="@drawable/url_selector"
+            android:textSize="24sp"
+            tools:text="www.google.com"
+            android:textColor="@android:color/black"
+            android:padding="16dp"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHorizontal_bias="0.0" />
 
-    <TextView
-        android:id="@+id/text_view_share_button"
-        android:text="@string/share_label"
-        android:drawableTop="@android:drawable/ic_menu_share"
-        style="@style/AppTheme.UrlButtonStyle"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewUrl"
-        app:layout_constraintLeft_toLeftOf="@+id/textViewUrl" />
+        <TextView
+            android:id="@+id/text_view_share_button"
+            android:text="@string/share_label"
+            android:drawableTop="@android:drawable/ic_menu_share"
+            style="@style/AppTheme.UrlButtonStyle"
+            app:layout_constraintRight_toLeftOf="@+id/text_view_search_button"
+            app:layout_constraintTop_toBottomOf="@+id/textViewUrl"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
 
-    <TextView
-        android:id="@+id/text_view_search_button"
-        android:text="@string/search_label"
-        android:drawableTop="@android:drawable/ic_menu_search"
-        style="@style/AppTheme.UrlButtonStyle"
-        app:layout_constraintLeft_toRightOf="@+id/text_view_share_button"
-        app:layout_constraintTop_toBottomOf="@+id/textViewUrl" />
+        <TextView
+            android:id="@+id/text_view_search_button"
+            android:text="@string/search_label"
+            android:drawableTop="@android:drawable/ic_menu_search"
+            style="@style/AppTheme.UrlButtonStyle"
+            app:layout_constraintTop_toBottomOf="@+id/textViewUrl"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-</android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
+</android.support.v7.widget.CardView>
+
