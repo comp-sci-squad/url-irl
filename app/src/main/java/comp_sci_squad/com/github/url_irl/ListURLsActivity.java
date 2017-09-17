@@ -91,7 +91,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         mTimestamp = (TextView) findViewById(R.id.timestamp);
         mTimestamp.setText(FormattingUtils.formatTimeStamp(mTimePictureTaken, getString(R.string.timestamp_format_pattern)));
         mImageView = (ImageView) findViewById(R.id.image_thumbnail);
-        GlideApp.with(getApplicationContext()).
+        GlideApp.with(this).
                 load(mURLScanThumbnail).
                 diskCacheStrategy(DiskCacheStrategy.NONE).
                 skipMemoryCache(true).

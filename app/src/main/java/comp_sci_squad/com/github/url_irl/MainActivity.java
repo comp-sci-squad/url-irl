@@ -114,7 +114,7 @@ public class MainActivity extends Activity implements
                     Log.d(TAG, "Converting image to bitmap");
                     RequestOptions options = new RequestOptions();
                     options.transform(new RotateTransformation(90.0f * mLastOrientation));
-                    GlideApp.with(getApplicationContext()).asBitmap().load(data).apply(options).into(new SimpleTarget<Bitmap>() {
+                    GlideApp.with(MainActivity.this).asBitmap().load(data).apply(options).into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(Bitmap image, Transition<? super Bitmap> transition) {
                             Log.d(TAG, "Converting image to text: ");
