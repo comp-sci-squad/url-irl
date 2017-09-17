@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -92,7 +93,11 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         mTimestamp = (TextView) findViewById(R.id.timestamp);
         mTimestamp.setText(FormattingUtils.formatTimeStamp(mTimePictureTaken, getString(R.string.timestamp_format_pattern)));
         mImageView = (ImageView) findViewById(R.id.image_thumbnail);
-        Glide.with(getApplicationContext()).load(mURLScanThumbnail).into(mImageView);
+        GlideApp.with(getApplicationContext()).
+                load(mURLScanThumbnail).
+                diskCacheStrategy(DiskCacheStrategy.NONE).
+                skipMemoryCache(true).
+                into(mImageView);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
