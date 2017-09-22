@@ -185,6 +185,8 @@ public class MainActivity extends Activity implements
             Log.d(TAG, "Converted image to text: ");
 
             mThumbnail = compressBitmap(params[0]);
+            params[0].recycle();
+            params[0] = null;
 
             return result;
         }
@@ -436,7 +438,8 @@ public class MainActivity extends Activity implements
 
             Matrix rotationMatrix = new Matrix();
             rotationMatrix.postRotate(mRotationAngle);
-            return Bitmap.createBitmap(toTransform, 0, 0, toTransform.getWidth(), toTransform.getHeight(), rotationMatrix, true);
+            Bitmap rotatedBitmap = Bitmap.createBitmap(toTransform, 0, 0, toTransform.getWidth(), toTransform.getHeight(), rotationMatrix, true);
+            return rotatedBitmap;
          }
 
         @Override
