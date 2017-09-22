@@ -73,6 +73,8 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         setContentView(R.layout.activity_list_urls);
         Log.d(TAG, "onCreate()");
 
+        Runtime.getRuntime().gc();
+
         //Get member variables from intent
         Intent sourceIntent = getIntent();
         if (sourceIntent != null && sourceIntent.hasExtra(getString(R.string.URI_ARRAY_LIST))) {
