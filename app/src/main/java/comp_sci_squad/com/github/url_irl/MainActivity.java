@@ -1,6 +1,8 @@
 package comp_sci_squad.com.github.url_irl;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -57,14 +59,18 @@ public class MainActivity extends Activity implements
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
     /**
+     * Duration of the picture taken animation. Set to system's default short animation time.
+     */
+    private int mShortAnimationDuration;
+
+    /**
      * UI Elements
      */
-    private CameraView mCamera;
-
-
+    CameraView mCamera;
     ImageButton mShutterButton;
     ProgressBar mProgressBar;
     MediaActionSound mShutterSound;
+    ImageView mCapturedImagePreview;
 
     /**
      * Orientation Private Variables
@@ -80,7 +86,8 @@ public class MainActivity extends Activity implements
      * Emulator Variables. Remove before release.
      */
     ImageView mEmulatorPreview;
-    Bitmap mEmulatorImage;
+    private Bitmap mEmulatorImage;
+    private boolean mEmulated;
 
     /**
      * Callback for Camera View
@@ -203,38 +210,41 @@ public class MainActivity extends Activity implements
             mShutterButton.setEnabled(true);
             Intent intent = ListURLsActivity.newIntent(mContext, mParsedText, mThumbnail, mTimeImageTaken);
             startActivity(intent);
+
+            Log.d(TAG, "Resetting Views.");
+
+            undoPictureAnimationChanges();
+
+            mShutterButton.setEnabled(true);
         }
     }
 
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Log.d(TAG, "Shutter Button Pressed");
+
             switch (v.getId()) {
                 case R.id.shutter_button:
-                    if (mCamera != null) {
-                        Log.d(TAG, "Shutter Button Pressed");
-                        mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
-                        mCamera.takePicture();
-
+                    if (mCamera != null || mEmulatorPreview != null) {
                         mShutterButton.setEnabled(false);
+
+                        if (mEmulated)
+                            mCapturedImagePreview.setImageBitmap(mEmulatorImage);
+                        else
+                            mCamera.takePicture();
+
+                        mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
+
+                        if (mEmulated) {
+                            TextRecognitionTask parsingTask = new TextRecognitionTask(
+                                    MainActivity.this, System.currentTimeMillis());
+                            parsingTask.execute(mEmulatorImage);
+                        }
+
+                    } else {
+                        Log.e(TAG, "Camera not instantiated.");
                     }
-                    break;
-            }
-        }
-    };
-
-    private View.OnClickListener mEmulatorOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.shutter_button:
-                    Log.d(TAG, "Shutter Button Pressed");
-                    mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
-
-                    TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this, System.currentTimeMillis());
-
-                    parsingTask.execute(mEmulatorImage);
-                    mShutterButton.setEnabled(false);
                     break;
             }
         }
@@ -311,7 +321,6 @@ public class MainActivity extends Activity implements
                 || Build.MANUFACTURER.contains("Genymotion")
                 || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
                 || "google_sdk".equals(Build.PRODUCT);
-
     }
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -320,46 +329,47 @@ public class MainActivity extends Activity implements
 
         mOrientationEventListener = new MyOrientationEventListener(this);
 
-        if(isEmulator()) {
+        mEmulated = isEmulator();
+        setContentView(mEmulated ? R.layout.emulator_main_activity: R.layout.activity_main);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new
+                    String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+        } else {
+            setUpCameraViews();
+        }
+    }
+
+    /**
+     * Associates view variables with their layout counterparts.
+     */
+    private void setUpCameraViews() {
+        if (!mEmulated) {
+            mCamera = (CameraView) findViewById(R.id.camera);
+            mCamera.addCallback(mCameraCallback);
+        } else {
             Log.w(TAG, "Emulator display. Remove before release.");
-            setContentView(R.layout.emulator_main_activity);
 
             InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
             mEmulatorImage = BitmapFactory.decodeStream(stream);
 
             mEmulatorPreview = (ImageView) findViewById(R.id.emulator_image);
             mEmulatorPreview.setImageBitmap(mEmulatorImage);
-
-            mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
-            mShutterButton.setOnClickListener(mEmulatorOnClickListener);
-
-            mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
-        } else {
-            setContentView(R.layout.activity_main);
-
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(MainActivity.this, new
-                        String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-            } else
-                inflateViews();
         }
-
-        mShutterSound = new MediaActionSound();
-        mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
-    }
-
-    /**
-     * Associates view variables with their layout counterparts.
-     */
-    private void inflateViews() {
-        mCamera = (CameraView) findViewById(R.id.camera);
-        mCamera.addCallback(mCameraCallback);
 
         mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
         mShutterButton.setOnClickListener(mOnClickListener);
 
         mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
+
+        mShutterSound = new MediaActionSound();
+        mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
+
+        mCapturedImagePreview = (ImageView) findViewById(R.id.image_preview);
+
+        mShortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
     }
 
 
@@ -392,7 +402,8 @@ public class MainActivity extends Activity implements
 
     @Override
     protected void onDestroy() {
-        mShutterSound.release();
+        if (mShutterSound != null)
+            mShutterSound.release();
         Log.v(TAG, "onDestroy()");
         super.onDestroy();
     }
@@ -412,7 +423,7 @@ public class MainActivity extends Activity implements
                 Log.d(TAG, "Permissions Result for Camera");
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d(TAG, "Request Successful");
-                    inflateViews();
+                    setUpCameraViews();
                 } else {
                     Log.d(TAG, "Permission for camera denied");
                     ActivityCompat.requestPermissions(MainActivity.this,
@@ -493,7 +504,6 @@ public class MainActivity extends Activity implements
         return inSampleSize;
     }
 
-
     /**
      * OrientationEventListener is abstract so this subclass extends it
      */
@@ -503,10 +513,10 @@ public class MainActivity extends Activity implements
             super(context);
         }
 
-
         /**
          * The orientationListener uses Android's Sensor Manager in the background
          * It calls MainActivity's onOrientationChanged if the orientation isn't flat (ORIENTATION_UNKOWN)
+         *
          * @param orientation - the orientation of the device as an angle. Vertical is 0 clockwise to 359
          */
         @Override
@@ -516,5 +526,55 @@ public class MainActivity extends Activity implements
                 MainActivity.this.onOrientationChanged(orientation);
             }
         }
+    }
+
+    /**
+     * Animation for when a user takes a picture. The changes must be undone
+     * with the {@link #undoPictureAnimationChanges()} before starting a new activity.
+     */
+    private void takePictureAnimation() {
+        final View cameraLikeView = mEmulated ? mEmulatorPreview : mCamera;
+
+        mCapturedImagePreview.setAlpha(0f);
+        mCapturedImagePreview.setVisibility(View.VISIBLE);
+        mCapturedImagePreview.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
+
+        mShutterButton.animate()
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        mShutterButton.setVisibility(View.GONE);
+                        mShutterButton.setAlpha(1f);
+                    }
+                });
+
+        cameraLikeView.animate()
+                .alpha(0f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        cameraLikeView.setVisibility(View.GONE);
+                        cameraLikeView.setAlpha(1f);
+                    }
+                });
+    }
+
+    /**
+     * Undoes the changes made by the {@link #takePictureAnimation()}.
+     */
+    private void undoPictureAnimationChanges() {
+        View cameraLikeView = mEmulated ? mEmulatorPreview : mCamera;
+
+        cameraLikeView.setVisibility(View.VISIBLE);
+        mShutterButton.setVisibility(View.VISIBLE);
+        mCapturedImagePreview.setVisibility(View.GONE);
     }
 }
