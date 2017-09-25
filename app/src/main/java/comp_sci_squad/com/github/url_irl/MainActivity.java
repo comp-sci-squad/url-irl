@@ -32,11 +32,17 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.os.AsyncTask;
 
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.cameraview.CameraView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements
@@ -107,9 +113,9 @@ public class MainActivity extends AppCompatActivity implements
                 }
 
                 /**
-                 * Converts the byte array to a bitmap and rotates it.
-                 * The parsing library only takes bitmaps and frames.
-                 * It is parsed for text with an AsyncTask that handles the next steps
+                 * Loads the image into a byte array with Glide.
+                 * Shrinks the bitmap based on available memory.
+                 * It is parsed for text with an AsyncTask that handles starting the ListURLS activity.
                  * @param cameraView - A reference to the cameraView the picture was taken with
                  * @param data - The taken picture as a byte array
                  */
@@ -117,32 +123,51 @@ public class MainActivity extends AppCompatActivity implements
                 public void onPictureTaken(CameraView cameraView, byte[] data) {
                     super.onPictureTaken(cameraView, data);
                     Log.d(TAG, "Picture taken");
+                    final long timeImageTaken = System.currentTimeMillis();
 
-                    Bitmap image = rotatePictureByOrientation(data, mLastOrientation);
-                    Log.d(TAG, "Converted image to text: ");
+                    Log.d(TAG, "Getting picture Dimensions");
+                    BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+                    bitmapOptions.inJustDecodeBounds = true;
+                    BitmapFactory.decodeByteArray(data, 0, data.length, bitmapOptions);
+                    int originalImageWidth = bitmapOptions.outWidth;
+                    int originalImageHeight = bitmapOptions.outHeight;
 
-                    // Displays the image to the user
-                    mCapturedImagePreview.setImageBitmap(image);
-                    mCapturedImagePreview.setVisibility(View.VISIBLE);
+                    Log.d(TAG, "Byte Array Size: " + data.length);
+                    Log.d(TAG, "ImageWidth: " + originalImageWidth);
+                    Log.d(TAG, "ImageHeight: " + originalImageHeight);
 
-                    TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this,
-                            System.currentTimeMillis());
+                    int inSampleSize = getInSampleSize(originalImageWidth, originalImageHeight);
 
-                    parsingTask.execute(image);
+                    final int newImageWidth = originalImageWidth / inSampleSize;
+                    final int newImageHeight = originalImageHeight / inSampleSize;
+
+                    //Rotate Options
+                    final RequestOptions options = new RequestOptions();
+                    options.transform(new RotateTransformation(90.0f * mLastOrientation));
+
+                    //Load parsing bitmap
+                    GlideApp.with(MainActivity.this).asBitmap().load(data).override(newImageWidth, newImageHeight).apply(options).into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap image, Transition<? super Bitmap> transition) {
+                            TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this, timeImageTaken);
+                            parsingTask.execute(image);
+                        }
+                    });
                 }
             };
 
     /**
      * This class parses images into text and starts ListUrlsActivity when done.
      */
-    private class TextRecognitionTask extends AsyncTask<Bitmap, Integer, Intent> {
+    protected class TextRecognitionTask extends AsyncTask<Bitmap, Integer, ArrayList<String>> {
         private Context mContext;
         private long mTimeImageTaken;
+        private byte[] mThumbnail;
 
         /**
-         * Constructor sets context for creating intent.
-         * @param context - Main Activity's context.
-         * @param timeImageTaken - The time the picture was taken at as a long. System.currentTimeMillis().
+         * Constructor to set extra variables
+         * @param context - The context for creating the new intent.
+         * @param timeImageTaken - The time the image was taken at as a long.
          */
         public TextRecognitionTask(Context context, long timeImageTaken) {
             mContext = context;
@@ -162,37 +187,34 @@ public class MainActivity extends AppCompatActivity implements
         /**
          * Called automatically by the AsyncTask.
          * @param params Bitmap varargs array that is going to be parsed for text.
-         * @return Intent - Returns an intent to start ListUrlsActivity passing in the the string arraylist,
-         * the thumbnail, and the time.
+         * @return ArrayList<String> - Returns the parsed text from the image.
          */
         @Override
-        protected Intent doInBackground(Bitmap... params) {
+        protected ArrayList<String> doInBackground(Bitmap... params) {
             Log.d(TAG, "URL Parsing Task Started");
             ArrayList<String> result = new ArrayList<>();
-            byte[] compressedImage = null;
 
-            for (Bitmap image : params) {
-                Log.d(TAG, "Converted image to text: ");
+            result.addAll(ImageToString.getTextFromPage(mContext, params[0]));
+            Log.d(TAG, "Converted image to text: ");
 
-                result.addAll(ImageToString.getTextFromPage(mContext, image));
-                compressedImage = compressBitmap(image);
-            }
+            mThumbnail = compressBitmap(params[0]);
+            params[0].recycle();
+            params[0] = null;
 
-            Intent intent = ListURLsActivity.newIntent(mContext, result, compressedImage, mTimeImageTaken);
-
-            return intent;
+            return result;
         }
 
         /**
          * Resets UI elements before starting ListUrlsActivity.
          * Called automatically by the AsyncTask.
-         * @param intent - The intent doInBackground() returns.
+         * @param mParsedText - The parsed text from the image.
          */
         @Override
-        protected void onPostExecute(Intent intent) {
+        protected void onPostExecute(ArrayList<String> mParsedText) {
             Log.d(TAG, "URL Parsing Task Ended.");
             mProgressBar.setVisibility(View.INVISIBLE);
-
+            mShutterButton.setEnabled(true);
+            Intent intent = ListURLsActivity.newIntent(mContext, mParsedText, mThumbnail, mTimeImageTaken);
             startActivity(intent);
 
             Log.d(TAG, "Resetting Views.");
@@ -219,8 +241,6 @@ public class MainActivity extends AppCompatActivity implements
                             mCamera.takePicture();
 
                         mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
-
-                        takePictureAnimation();
 
                         if (mEmulated) {
                             TextRecognitionTask parsingTask = new TextRecognitionTask(
@@ -361,6 +381,7 @@ public class MainActivity extends AppCompatActivity implements
                 android.R.integer.config_shortAnimTime);
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.d(TAG, "Creating Options Menu");
@@ -447,26 +468,30 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    /**
-     * Rotates an image so that it's orientation matches the phone's, as camera orientation
-     * and phone orientation differ.
-     *
-     * @param imageData - a byte array of image data
-     * @param rotation - a integer corresponding to the rotation of the phone.
-     * @return Bitmap - a picture that is rotated properly according to the phone orientation.
-     */
-    private Bitmap rotatePictureByOrientation(byte[] imageData, int rotation) {
-        float rotationAmount = mLastOrientation * 90.0f + 90.0f;
+    public class RotateTransformation extends BitmapTransformation {
+        private float mRotationAngle = 0.0f;
+        private static final String BASE_ID = "comp_sci_squad.com.github.url_irl.MainActivity.RotateTransformation";
 
-        Matrix rotationMatrix = new Matrix();
-        rotationMatrix.postRotate(rotationAmount);
+        public RotateTransformation(float rotationAngle) {
+            this.mRotationAngle = rotationAngle;
+        }
 
-        Bitmap img = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+        @Override
+        protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+            Log.d(TAG, "Transforming Bitmap by degrees: " + mRotationAngle);
+            if (Float.compare(mRotationAngle, 0.0f) == 0)
+                return toTransform;
 
-        img = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(),
-                rotationMatrix, true);
+            Matrix rotationMatrix = new Matrix();
+            rotationMatrix.postRotate(mRotationAngle);
+            Bitmap rotatedBitmap = Bitmap.createBitmap(toTransform, 0, 0, toTransform.getWidth(), toTransform.getHeight(), rotationMatrix, true);
+            return rotatedBitmap;
+         }
 
-        return  img;
+        @Override
+        public void updateDiskCacheKey(MessageDigest messageDigest) {
+            messageDigest.update((BASE_ID + mRotationAngle).getBytes());
+        }
     }
 
     /**
@@ -480,13 +505,38 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "Compressing thumbnail Bitmap");
         int thumbnailHeight = image.getHeight()/getResources().getInteger(R.integer.THUMBNAIL_SHRINK_RATIO);
         int thumbnailWidth = image.getWidth()/getResources().getInteger(R.integer.THUMBNAIL_SHRINK_RATIO);
-        
+
         Bitmap scaled = Bitmap.createScaledBitmap(image, thumbnailWidth, thumbnailHeight, true);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         scaled.compress(Bitmap.CompressFormat.JPEG, 80, stream);
         byte[] compressedByteArray = stream.toByteArray();
         Log.d(TAG, "Passing byte array thumbnail image of size: " + compressedByteArray.length);
         return stream.toByteArray();
+    }
+
+    /**
+     * Calculates the power of 2 the bitmap size must be reduced by to fit within the curent JVM Heap.
+     * Assumes there will be other allocations and that 2 bitmaps of the size will be allocated.
+     * @param width - current width of the image.
+     * @param height - current height of the image.
+     * @return The power of 2 the image is to be shrunken by.
+     */
+    private int getInSampleSize(int width, int height) {
+        Runtime rt = Runtime.getRuntime();
+        long availiableMem = rt.maxMemory() - rt.totalMemory() - rt.freeMemory();
+
+        //Width * Height * bytes/pixel * 2 bitmaps because rotation
+        long memCost = (width * height * 4 * 2);
+        int inSampleSize = 1;
+
+        //.9 for random overhead from other allocations
+        while (memCost > availiableMem * .9) {
+            inSampleSize *= 2;
+            memCost /= 2;
+        }
+
+        Log.d(TAG, "In Sample Size: " + inSampleSize);
+        return inSampleSize;
     }
 
     /**

@@ -31,10 +31,14 @@ public class ImageToString {
      * the picture.
      */
     public static ArrayList<String> getTextFromPage(Context context, Bitmap bitmap) {
+        Log.d(TAG, "Creating Text Recognizer");
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
 
         // Create a frame from the bitmap and run text detection on the frame.
+        Log.d(TAG, "Creating frame.");
         Frame frame = new Frame.Builder().setBitmap(bitmap).build();
+
+        Log.d(TAG, "Parsing text");
         SparseArray<TextBlock> textBlockSparseArray = textRecognizer.detect(frame);
 
         if (!textRecognizer.isOperational()) {
