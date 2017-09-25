@@ -356,12 +356,18 @@ public class MainActivity extends AppCompatActivity implements
             mCamera.addCallback(mCameraCallback);
         } else {
             Log.w(TAG, "Emulator display. Remove before release.");
-
-            InputStream stream = getResources().openRawResource(R.raw.tester_pic_four_facebook);
-            mEmulatorImage = BitmapFactory.decodeStream(stream);
-
             mEmulatorPreview = (ImageView) findViewById(R.id.emulator_image);
-            mEmulatorPreview.setImageBitmap(mEmulatorImage);
+
+            Log.d(TAG, "Loading Image into mEmulatorPreview");
+            GlideApp.with(this).load(R.raw.tester_pic_remove_on_release).into(mEmulatorPreview);
+
+            Log.d(TAG, "Loading Image into Bitmap");
+            GlideApp.with(this).asBitmap().load(R.raw.tester_pic_remove_on_release).into(new SimpleTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                    mEmulatorImage = resource;
+                }
+            });
         }
 
         mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
