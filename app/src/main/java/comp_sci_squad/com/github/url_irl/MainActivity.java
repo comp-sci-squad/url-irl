@@ -219,9 +219,6 @@ public class MainActivity extends AppCompatActivity implements
             startActivity(intent);
 
             Log.d(TAG, "Resetting Views.");
-
-            undoPictureAnimationChanges();
-
             mShutterButton.setEnabled(true);
         }
     }
@@ -583,55 +580,5 @@ public class MainActivity extends AppCompatActivity implements
                 MainActivity.this.onOrientationChanged(orientation);
             }
         }
-    }
-
-    /**
-     * Animation for when a user takes a picture. The changes must be undone
-     * with the {@link #undoPictureAnimationChanges()} before starting a new activity.
-     */
-    private void takePictureAnimation() {
-        final View cameraLikeView = mEmulated ? mEmulatorPreview : mCamera;
-
-        mCapturedImagePreview.setAlpha(0f);
-        mCapturedImagePreview.setVisibility(View.VISIBLE);
-        mCapturedImagePreview.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-        mShutterButton.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        mShutterButton.setVisibility(View.GONE);
-                        mShutterButton.setAlpha(1f);
-                    }
-                });
-
-        cameraLikeView.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        cameraLikeView.setVisibility(View.GONE);
-                        cameraLikeView.setAlpha(1f);
-                    }
-                });
-    }
-
-    /**
-     * Undoes the changes made by the {@link #takePictureAnimation()}.
-     */
-    private void undoPictureAnimationChanges() {
-        View cameraLikeView = mEmulated ? mEmulatorPreview : mCamera;
-
-        cameraLikeView.setVisibility(View.VISIBLE);
-        mShutterButton.setVisibility(View.VISIBLE);
-        mCapturedImagePreview.setVisibility(View.GONE);
     }
 }
