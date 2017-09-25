@@ -10,7 +10,7 @@
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/main_activity_toolbar"
-        style="@style/AppTheme.ToolBarStyle"
+        style="@style/AppTheme.ToolBarStyle.Transparent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" >
