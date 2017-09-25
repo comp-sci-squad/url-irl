@@ -143,7 +143,8 @@ public class MainActivity extends AppCompatActivity implements
 
                     //Rotate Options
                     final RequestOptions options = new RequestOptions();
-                    options.transform(new RotateTransformation(90.0f * mLastOrientation));
+                    if (mLastOrientation != 0)
+                        options.transform(new RotateTransformation(90.0f * mLastOrientation));
 
                     //Load parsing bitmap
                     GlideApp.with(MainActivity.this).asBitmap().load(data).override(newImageWidth, newImageHeight).apply(options).into(new SimpleTarget<Bitmap>() {
@@ -381,6 +382,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
+    /**
+     * Create an options menu. It will create
+     *  - Torchlight button
+     * @param menu - The Options Menu being created.
+     * @return - True because it handled the menu creation.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -390,6 +397,12 @@ public class MainActivity extends AppCompatActivity implements
         return true;
     }
 
+    /**
+     * Handles menu items being selected.
+     * If the item was share_all, start the share chooser with all the urls.
+     * @param item - The item selected.
+     * @return - Returns true if successfully handled or calls super method.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "Options Item Selected");
@@ -468,11 +481,20 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    public class RotateTransformation extends BitmapTransformation {
+    /**
+     * Class for GlideApp to Transform bitmaps.
+     * The bitmap pool isn't correctly used but most likely isn't needed because of the size of the bitmaps involved.
+     */
+    private class RotateTransformation extends BitmapTransformation {
         private float mRotationAngle = 0.0f;
         private static final String BASE_ID = "comp_sci_squad.com.github.url_irl.MainActivity.RotateTransformation";
 
-        public RotateTransformation(float rotationAngle) {
+        /**
+         * Constructor for the rotation transformation.
+         * The class is designed to be reused with multiple transformations.
+         * @param rotationAngle - The angle, generally 90, 180, 270
+         */
+        private RotateTransformation(float rotationAngle) {
             this.mRotationAngle = rotationAngle;
         }
 
