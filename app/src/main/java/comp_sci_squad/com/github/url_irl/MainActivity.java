@@ -3,7 +3,6 @@ package comp_sci_squad.com.github.url_irl;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,7 +16,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
@@ -32,9 +36,10 @@ import com.google.android.cameraview.CameraView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 
-public class MainActivity extends Activity implements
+public class MainActivity extends AppCompatActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
     /**
      * Extra Name Constants for the ListURLsActivity Intent
@@ -65,6 +70,7 @@ public class MainActivity extends Activity implements
     ProgressBar mProgressBar;
     MediaActionSound mShutterSound;
     ImageView mCapturedImagePreview;
+    Toolbar mToolBar;
 
     /**
      * Orientation Private Variables
@@ -305,12 +311,15 @@ public class MainActivity extends Activity implements
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v(TAG, "onCreate()");;
+        Log.d(TAG, "onCreate()");
+        mEmulated = isEmulator();
+        setContentView(mEmulated ? R.layout.emulator_main_activity: R.layout.activity_main);
 
         mOrientationEventListener = new MyOrientationEventListener(this);
 
-        mEmulated = isEmulator();
-        setContentView(mEmulated ? R.layout.emulator_main_activity: R.layout.activity_main);
+        mToolBar = (Toolbar) findViewById(R.id.main_activity_toolbar);
+        setSupportActionBar(mToolBar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -353,29 +362,55 @@ public class MainActivity extends Activity implements
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Log.d(TAG, "Creating Options Menu");
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_activity_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG, "Options Item Selected");
+        if (item.getItemId() == R.id.torch_menu_item) {
+            if (mCamera.getFlash() == CameraView.FLASH_TORCH) {
+                Log.d(TAG, "Disabling Torch");
+                mCamera.setFlash(CameraView.FLASH_OFF);
+            } else {
+                Log.d(TAG, "Enabling Torch");
+                mCamera.setFlash(CameraView.FLASH_TORCH);
+            }
+            return true;
+        } else
+            return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        Log.v(TAG, "onResume()");
+        Log.d(TAG, "onResume()");
         if (mOrientationEventListener.canDetectOrientation()) {
-            Log.v(TAG, "Orientation Event Listener can detect orientation");
+            Log.d(TAG, "Orientation Event Listener can detect orientation");
             mOrientationEventListener.enable();
         } else {
             Log.d(TAG, "Orientation Event Listener cannot detect orientation");
         }
         if (mCamera != null)
             mCamera.start();
-        Log.v(TAG, "Camera Resumed");
+        Log.d(TAG, "Camera Resumed");
 
         Toast.makeText(this, R.string.camera_prompt, Toast.LENGTH_LONG).show();
     }
 
     @Override
     protected void onPause() {
-        Log.v(TAG, "onPause()");
+        Log.d(TAG, "onPause()");
         mOrientationEventListener.disable();
-        if (mCamera != null)
+        if (mCamera != null) {
+            mCamera.setFlash(CameraView.FLASH_OFF);
             mCamera.stop();
-        Log.v(TAG, "Camera Paused");
+        }
+        Log.d(TAG, "Camera Paused");
         super.onPause();
     }
 
@@ -383,7 +418,7 @@ public class MainActivity extends Activity implements
     protected void onDestroy() {
         if (mShutterSound != null)
             mShutterSound.release();
-        Log.v(TAG, "onDestroy()");
+        Log.d(TAG, "onDestroy()");
         super.onDestroy();
     }
 

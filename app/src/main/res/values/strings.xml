@@ -11,6 +11,7 @@
     <string name="need_permission">This app requires the camera to function. Please enable it under the permissions tab under settings.</string>
     <string name="low_storage_error">Text detector dependencies cannot be downloaded due to low device storage</string>
     <string name="list_toast"> hello </string>
+    <string name="action_torch">FlashLight</string>
 
     <!-- List Urls Activity -->
     <string name="URI_ARRAY_LIST">comp_sci_squad.com.github.url_irl.uri_array_true</string>

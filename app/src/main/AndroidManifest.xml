@@ -17,10 +17,11 @@
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="ocr" />
 
-        <activity android:name=".MainActivity"
-                  android:label="@string/title_activity_camera_viewer"
-                  android:theme="@android:style/Theme.Black.NoTitleBar"
-                  android:screenOrientation="locked">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_camera_viewer"
+            android:screenOrientation="locked"
+            android:theme="@style/AppTheme.TransparentToolbar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,8 +31,7 @@
 
         <activity
             android:name=".ListURLsActivity"
-            android:label="@string/list_urls_title"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:label="@string/list_urls_title">
         </activity>
 
     </application>
