@@ -125,6 +125,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        Log.d(TAG, "Creating Options Menu");
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_list_urls, menu);
@@ -134,11 +135,13 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     /**
      * Handles menu items being selected.
      * If the item was share_all, start the share chooser with all the urls.
+     * The super class handles the back button.
      * @param item - The item selected.
      * @return - Returns true if successfully handled or calls super method.
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG, "Options Item Selected");
         switch (item.getItemId()) {
             case R.id.share_all:
                 // Share the URLS
@@ -157,7 +160,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     }
 
     public static Intent newIntent(Context packageContext, ArrayList<String> stringListExtra, byte[] thumbnailExtra, long timePictureTakenExtra) {
-        Log.d(TAG, "Getting Intent");
+        Log.d(TAG, "Creating intent");
 
         Intent intent = new Intent(packageContext, ListURLsActivity.class);
         intent.putExtra(packageContext.getString(R.string.URI_ARRAY_LIST), stringListExtra);
