@@ -1,8 +1,6 @@
 package comp_sci_squad.com.github.url_irl;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -40,8 +38,6 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.android.cameraview.CameraView;
 
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 
@@ -62,11 +58,6 @@ public class MainActivity extends AppCompatActivity implements
     private String TAG = "CAMERA_ACTIVITY";
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
-
-    /**
-     * Duration of the picture taken animation. Set to system's default short animation time.
-     */
-    private int mShortAnimationDuration;
 
     /**
      * UI Elements
@@ -234,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements
                         mShutterButton.setEnabled(false);
 
                         if (mEmulated)
-                            mCapturedImagePreview.setImageBitmap(mEmulatorImage);
+                            GlideApp.with(MainActivity.this).load(R.raw.tester_pic_remove_on_release).into(mCapturedImagePreview);
                         else
                             mCamera.takePicture();
 
@@ -379,9 +370,6 @@ public class MainActivity extends AppCompatActivity implements
         mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
 
         mCapturedImagePreview = (ImageView) findViewById(R.id.image_preview);
-
-        mShortAnimationDuration = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
     }
 
 
