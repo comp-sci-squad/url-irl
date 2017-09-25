@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -88,6 +89,9 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         Log.d(TAG, "Assigning Member variables");
         mToolBar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolBar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mTimestamp = (TextView) findViewById(R.id.timestamp);
@@ -121,6 +125,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_list_urls, menu);
         return true;
@@ -150,7 +155,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
         }
     }
-
 
     public static Intent newIntent(Context packageContext, ArrayList<String> stringListExtra, byte[] thumbnailExtra, long timePictureTakenExtra) {
         Log.d(TAG, "Getting Intent");
