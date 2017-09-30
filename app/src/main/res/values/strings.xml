@@ -22,6 +22,5 @@
     <string name="share_label">Share</string>
     <string name="search_label">Search</string>
     <string name="timestamp_default" translatable="false">Aug 29, 2017 12:17 AM</string>
-    <string name="timestamp_format_pattern"> MMM d, yyyy h:mm a</string>
     <string name="copy_to_clipboard">Copied to Clipboard!</string>
 </resources>

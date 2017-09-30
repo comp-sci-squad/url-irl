@@ -1,8 +1,6 @@
 package comp_sci_squad.com.github.url_irl.utilities;
 
-import android.content.Context;
-
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Date;
 
 /**
@@ -15,11 +13,10 @@ public class FormattingUtils {
      * Used in ListURLSActivity.
      *
      * @param timeInMillis - The time in milliseconds.
-     * @param dateFormat - The date format as a SimpleDateFormat string.
-     * @return - Returns the formatted timestamp string.
+     * @return - Returns the formatted timestamp string with the user's localization.
      */
-    public static String formatTimeStamp(long timeInMillis, String dateFormat) {
-        SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-        return formatter.format(new Date(timeInMillis));
+    public static String formatTimeStamp(long timeInMillis) {
+        DateFormat df = DateFormat.getDateTimeInstance();
+        return df.format(new Date(timeInMillis));
     }
 }

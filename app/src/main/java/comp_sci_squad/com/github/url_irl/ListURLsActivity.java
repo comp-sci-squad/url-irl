@@ -95,7 +95,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
         mTimestamp = (TextView) findViewById(R.id.timestamp);
-        mTimestamp.setText(FormattingUtils.formatTimeStamp(mTimePictureTaken, getString(R.string.timestamp_format_pattern)));
+        mTimestamp.setText(FormattingUtils.formatTimeStamp(mTimePictureTaken));
         mImageView = (ImageView) findViewById(R.id.image_thumbnail);
         GlideApp.with(this).
                 load(mURLScanThumbnail).
