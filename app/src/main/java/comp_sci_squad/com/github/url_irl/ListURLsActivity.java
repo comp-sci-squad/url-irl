@@ -88,6 +88,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         //Set UI member variables and data storage elements
         Log.d(TAG, "Assigning Member variables");
         mToolBar = (Toolbar) findViewById(R.id.toolbar);
+        mToolBar.setTitle(getString(R.string.title_activity_list_urls));
         setSupportActionBar(mToolBar);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);

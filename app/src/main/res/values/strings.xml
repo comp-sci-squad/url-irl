@@ -13,7 +13,7 @@
     <string name="action_torch">FlashLight</string>
 
     <!-- List Urls Activity -->
-    <string name="title_activity_list_urls">Urls Found</string>
+    <string name="title_activity_list_urls">URLs Found</string>
     <string name="URI_ARRAY_LIST">comp_sci_squad.com.github.url_irl.uri_array_true</string>
     <string name="string_number_of_strings">Number of Strings in List: </string>
     <string name="strings_list">List: </string>

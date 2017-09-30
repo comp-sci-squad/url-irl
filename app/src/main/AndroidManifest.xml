@@ -12,7 +12,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:hardwareAccelerated="true">
+        android:hardwareAccelerated="true"
+        >
 
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"
@@ -20,7 +21,6 @@
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_camera_viewer"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.TransparentToolbar">
             <intent-filter>
@@ -32,8 +32,7 @@
 
         <activity
             android:name=".ListURLsActivity"
-            android:parentActivityName=".MainActivity"
-            android:label="@string/list_urls_title">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />

@@ -327,6 +327,7 @@ public class MainActivity extends AppCompatActivity implements
         mOrientationEventListener = new MyOrientationEventListener(this);
 
         mToolBar = (Toolbar) findViewById(R.id.main_activity_toolbar);
+        mToolBar.setTitle(getString(R.string.title_activity_camera_viewer));
         setSupportActionBar(mToolBar);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
