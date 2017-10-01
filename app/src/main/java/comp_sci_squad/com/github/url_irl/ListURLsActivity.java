@@ -13,7 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,12 +35,6 @@ import static comp_sci_squad.com.github.url_irl.MainActivity.PICTURE_EXTRA;
 import static comp_sci_squad.com.github.url_irl.MainActivity.TIME_EXTRA;
 
 public class ListURLsActivity extends AppCompatActivity implements UriAdapter.ListItemClickListener {
-
-    /**
-     * Logging Tag
-     */
-    private static final String TAG = "ListURLSActivity";
-
     /**
      * UI Elements
      */
@@ -72,7 +66,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_urls);
-        Log.d(TAG, "onCreate()");
 
         Runtime.getRuntime().gc();
 
@@ -86,7 +79,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         }
 
         //Set UI member variables and data storage elements
-        Log.d(TAG, "Assigning Member variables");
         mToolBar = (Toolbar) findViewById(R.id.toolbar);
         mToolBar.setTitle(getString(R.string.title_activity_list_urls));
         setSupportActionBar(mToolBar);
@@ -112,8 +104,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         recyclerView.setAdapter(mAdapter);
 
         //Converts arraylist<string> to var args and runs the async task
-        Log.d(TAG, "Starting UrlParseTask");
-
         new UrlParseTask().execute(mStringBlocks.toArray(new String[mStringBlocks.size()]));
 
     }
@@ -126,7 +116,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.d(TAG, "Creating Options Menu");
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_list_urls, menu);
@@ -142,14 +131,11 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG, "Options Item Selected");
         switch (item.getItemId()) {
             case R.id.share_all:
                 // Share the URLS
                 if (mShareIntent != null)
                     startActivity(Intent.createChooser(mShareIntent, "Share using"));
-                else
-                    Log.e(TAG, "Share intent was null");
                 return true;
 
             default:
@@ -161,8 +147,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     }
 
     public static Intent newIntent(Context packageContext, ArrayList<String> stringListExtra, byte[] thumbnailExtra, long timePictureTakenExtra) {
-        Log.d(TAG, "Creating intent");
-
         Intent intent = new Intent(packageContext, ListURLsActivity.class);
         intent.putExtra(packageContext.getString(R.string.URI_ARRAY_LIST), stringListExtra);
         intent.putExtra(PICTURE_EXTRA, thumbnailExtra);
@@ -177,7 +161,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
      */
     @Override
     public void onListItemClick(int clickedItemIndex) {
-        Log.d(TAG, "onListItemClick");
         Intent i = new Intent(Intent.ACTION_VIEW, mAdapter.getUri(clickedItemIndex));
         startActivity(i);
     }
@@ -188,7 +171,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
      */
     @Override
     public void onShareButtonClick(int clickedItemIndex) {
-        Log.d(TAG, "onShareButtonClick");
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
         //mShareIntent.putExtra(Intent.EXTRA_SUBJECT, "R.string.sharing_url_subject");
@@ -202,7 +184,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
      */
     @Override
     public void onSearchButtonClick(int clickedItemIndex) {
-        Log.d(TAG, "onSearchButtonClick");
         String googleSearchUrl = "https://www.google.com/search?q=";
         Uri searchUri = Uri.parse(googleSearchUrl + mAdapter.getUri(clickedItemIndex).getHost());
         Intent searchIntent = new Intent(Intent.ACTION_VIEW, searchUri);

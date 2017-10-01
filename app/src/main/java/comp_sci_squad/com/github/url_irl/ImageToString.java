@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
@@ -20,8 +19,6 @@ import java.util.ArrayList;
  */
 
 public class ImageToString {
-    private static final String TAG = "ImageToString";
-
     /**
      * Parses an image for text.
      *
@@ -31,14 +28,11 @@ public class ImageToString {
      * the picture.
      */
     public static ArrayList<String> getTextFromPage(Context context, Bitmap bitmap) {
-        Log.d(TAG, "Creating Text Recognizer");
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
 
         // Create a frame from the bitmap and run text detection on the frame.
-        Log.d(TAG, "Creating frame.");
         Frame frame = new Frame.Builder().setBitmap(bitmap).build();
 
-        Log.d(TAG, "Parsing text");
         SparseArray<TextBlock> textBlockSparseArray = textRecognizer.detect(frame);
 
         if (!textRecognizer.isOperational()) {
@@ -49,7 +43,6 @@ public class ImageToString {
 
             if (hasLowStorage) {
                 Toast.makeText(context, R.string.low_storage_error, Toast.LENGTH_LONG).show();
-                Log.w(TAG, context.getString(R.string.low_storage_error));
             }
         }
 
@@ -66,9 +59,7 @@ public class ImageToString {
     private static ArrayList<String> getStrings(SparseArray<TextBlock> tester) {
         ArrayList<String> inputString = new ArrayList<>();
 
-        Log.d(TAG, "Strings found:");
         for (int i = 0; i < tester.size(); i++) {
-            Log.d(TAG, tester.valueAt(i).getValue());
             inputString.add(tester.valueAt(i).getValue());
         }
         return inputString;

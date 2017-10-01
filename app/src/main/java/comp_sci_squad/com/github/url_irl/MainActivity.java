@@ -16,7 +16,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -52,11 +51,6 @@ public class MainActivity extends AppCompatActivity implements
     public static final String PICTURE_EXTRA = "bitmapBytes";
     public static final String TIME_EXTRA = "time";
 
-    /**
-     * Logging Tag
-     */
-    private String TAG = "CAMERA_ACTIVITY";
-
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
     /**
@@ -87,13 +81,11 @@ public class MainActivity extends AppCompatActivity implements
                 @Override
                 public void onCameraOpened(CameraView cameraView) {
                     super.onCameraOpened(cameraView);
-                    Log.d(TAG, "Camera Opened");
                 }
 
                 @Override
                 public void onCameraClosed(CameraView cameraView) {
                     super.onCameraClosed(cameraView);
-                    Log.d(TAG, "Camera Closed");
                 }
 
                 /**
@@ -106,19 +98,13 @@ public class MainActivity extends AppCompatActivity implements
                 @Override
                 public void onPictureTaken(CameraView cameraView, byte[] data) {
                     super.onPictureTaken(cameraView, data);
-                    Log.d(TAG, "Picture taken");
                     final long timeImageTaken = System.currentTimeMillis();
 
-                    Log.d(TAG, "Getting picture Dimensions");
                     BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
                     bitmapOptions.inJustDecodeBounds = true;
                     BitmapFactory.decodeByteArray(data, 0, data.length, bitmapOptions);
                     int originalImageWidth = bitmapOptions.outWidth;
                     int originalImageHeight = bitmapOptions.outHeight;
-
-                    Log.d(TAG, "Byte Array Size: " + data.length);
-                    Log.d(TAG, "ImageWidth: " + originalImageWidth);
-                    Log.d(TAG, "ImageHeight: " + originalImageHeight);
 
                     int inSampleSize = getInSampleSize(originalImageWidth, originalImageHeight);
 
@@ -176,11 +162,9 @@ public class MainActivity extends AppCompatActivity implements
          */
         @Override
         protected ArrayList<String> doInBackground(Bitmap... params) {
-            Log.d(TAG, "URL Parsing Task Started");
             ArrayList<String> result = new ArrayList<>();
 
             result.addAll(ImageToString.getTextFromPage(mContext, params[0]));
-            Log.d(TAG, "Converted image to text: ");
 
             mThumbnail = compressBitmap(params[0]);
             params[0].recycle();
@@ -196,13 +180,11 @@ public class MainActivity extends AppCompatActivity implements
          */
         @Override
         protected void onPostExecute(ArrayList<String> mParsedText) {
-            Log.d(TAG, "URL Parsing Task Ended.");
             mProgressBar.setVisibility(View.INVISIBLE);
             mShutterButton.setEnabled(true);
             Intent intent = ListURLsActivity.newIntent(mContext, mParsedText, mThumbnail, mTimeImageTaken);
             startActivity(intent);
 
-            Log.d(TAG, "Resetting Views.");
             mShutterButton.setEnabled(true);
         }
     }
@@ -210,8 +192,6 @@ public class MainActivity extends AppCompatActivity implements
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Log.d(TAG, "Shutter Button Pressed");
-
             switch (v.getId()) {
                 case R.id.shutter_button:
                     if (mCamera != null) {
@@ -219,8 +199,6 @@ public class MainActivity extends AppCompatActivity implements
                         mCamera.takePicture();
 
                         mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
-                    } else {
-                        Log.e(TAG, "Camera not instantiated.");
                     }
                     break;
             }
@@ -248,16 +226,12 @@ public class MainActivity extends AppCompatActivity implements
 
             //Rotate animation forward, backward, or 180 depending on change in Orientation
             if (newOrientation == (mLastOrientation + 1) % 4) {
-                Log.d(TAG, "Phone rotated clockwise");
                 newRotation = mLastRotation - 90.0f;
             } else if (newOrientation == ((mLastOrientation + 3) % 4)) {
-                Log.d(TAG, "Phone rotated counterclockwise");
                 newRotation = mLastRotation + 90.0f;
             } else {
-                Log.d(TAG, "Phone flipped");
                 newRotation = mLastRotation + 180.0f;
             }
-            Log.d(TAG, "Rotate Previous: " + mLastRotation + "   Rotate New: " + newRotation);
 
             //Create Rotation Animation
             RotateAnimation rotateAnimation = new RotateAnimation(
@@ -277,13 +251,11 @@ public class MainActivity extends AppCompatActivity implements
             //Set variables for next iteration
             mLastOrientation = newOrientation;
             mLastRotation = newRotation;
-            Log.d(TAG, "Orientation Changed to: " + newOrientation);
         }
     }
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
 
         mOrientationEventListener = new MyOrientationEventListener(this);
@@ -329,7 +301,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        Log.d(TAG, "Creating Options Menu");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_activity_main, menu);
         return true;
@@ -343,13 +314,10 @@ public class MainActivity extends AppCompatActivity implements
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG, "Options Item Selected");
         if (item.getItemId() == R.id.torch_menu_item) {
             if (mCamera.getFlash() == CameraView.FLASH_TORCH) {
-                Log.d(TAG, "Disabling Torch");
                 mCamera.setFlash(CameraView.FLASH_OFF);
             } else {
-                Log.d(TAG, "Enabling Torch");
                 mCamera.setFlash(CameraView.FLASH_TORCH);
             }
             return true;
@@ -360,29 +328,22 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume()");
         if (mOrientationEventListener.canDetectOrientation()) {
-            Log.d(TAG, "Orientation Event Listener can detect orientation");
             mOrientationEventListener.enable();
         } else {
-            Log.d(TAG, "Orientation Event Listener cannot detect orientation");
         }
         if (mCamera != null)
             mCamera.start();
-        Log.d(TAG, "Camera Resumed");
-
         Toast.makeText(this, R.string.camera_prompt, Toast.LENGTH_LONG).show();
     }
 
     @Override
     protected void onPause() {
-        Log.d(TAG, "onPause()");
         mOrientationEventListener.disable();
         if (mCamera != null) {
             mCamera.setFlash(CameraView.FLASH_OFF);
             mCamera.stop();
         }
-        Log.d(TAG, "Camera Paused");
         super.onPause();
     }
 
@@ -390,7 +351,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         if (mShutterSound != null)
             mShutterSound.release();
-        Log.d(TAG, "onDestroy()");
         super.onDestroy();
     }
 
@@ -406,12 +366,9 @@ public class MainActivity extends AppCompatActivity implements
                                            @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CAMERA_PERMISSION:
-                Log.d(TAG, "Permissions Result for Camera");
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "Request Successful");
                     setUpCameraViews();
                 } else {
-                    Log.d(TAG, "Permission for camera denied");
                     ActivityCompat.requestPermissions(MainActivity.this,
                             new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
                 }
@@ -438,7 +395,6 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
-            Log.d(TAG, "Transforming Bitmap by degrees: " + mRotationAngle);
             if (Float.compare(mRotationAngle, 0.0f) == 0)
                 return toTransform;
 
@@ -462,7 +418,6 @@ public class MainActivity extends AppCompatActivity implements
      * @return byte[] - the compressed picture as a byte array
      */
     private byte[] compressBitmap(Bitmap image) {
-        Log.d(TAG, "Compressing thumbnail Bitmap");
         int thumbnailHeight = image.getHeight()/getResources().getInteger(R.integer.THUMBNAIL_SHRINK_RATIO);
         int thumbnailWidth = image.getWidth()/getResources().getInteger(R.integer.THUMBNAIL_SHRINK_RATIO);
 
@@ -470,7 +425,6 @@ public class MainActivity extends AppCompatActivity implements
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         scaled.compress(Bitmap.CompressFormat.JPEG, 80, stream);
         byte[] compressedByteArray = stream.toByteArray();
-        Log.d(TAG, "Passing byte array thumbnail image of size: " + compressedByteArray.length);
         return stream.toByteArray();
     }
 
@@ -495,7 +449,6 @@ public class MainActivity extends AppCompatActivity implements
             memCost /= 2;
         }
 
-        Log.d(TAG, "In Sample Size: " + inSampleSize);
         return inSampleSize;
     }
 
@@ -517,7 +470,6 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         public void onOrientationChanged(int orientation) {
             if (orientation != MyOrientationEventListener.ORIENTATION_UNKNOWN) {
-                Log.v("Orientation", Integer.toString(orientation));
                 MainActivity.this.onOrientationChanged(orientation);
             }
         }
