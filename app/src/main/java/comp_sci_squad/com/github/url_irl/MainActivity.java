@@ -80,13 +80,6 @@ public class MainActivity extends AppCompatActivity implements
     private float mLastRotation = 0.0f;
 
     /**
-     * Emulator Variables. Remove before release.
-     */
-    ImageView mEmulatorPreview;
-    private Bitmap mEmulatorImage;
-    private boolean mEmulated;
-
-    /**
      * Callback for Camera View
      */
     private CameraView.Callback mCameraCallback =
@@ -221,22 +214,11 @@ public class MainActivity extends AppCompatActivity implements
 
             switch (v.getId()) {
                 case R.id.shutter_button:
-                    if (mCamera != null || mEmulatorPreview != null) {
+                    if (mCamera != null) {
                         mShutterButton.setEnabled(false);
-
-                        if (mEmulated)
-                            GlideApp.with(MainActivity.this).load(R.raw.tester_pic_remove_on_release).into(mCapturedImagePreview);
-                        else
-                            mCamera.takePicture();
+                        mCamera.takePicture();
 
                         mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
-
-                        if (mEmulated) {
-                            TextRecognitionTask parsingTask = new TextRecognitionTask(
-                                    MainActivity.this, System.currentTimeMillis());
-                            parsingTask.execute(mEmulatorImage);
-                        }
-
                     } else {
                         Log.e(TAG, "Camera not instantiated.");
                     }
@@ -299,30 +281,10 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    /**
-     * Checks if the app is run on an emulator.
-     *
-     * Warning: this and other emulator code should be removed from release
-     * versions of the app, as it is rumored to yield some false positives.
-     *
-     * @return boolean - True if the app is being run on an emulator.
-     */
-    public static boolean isEmulator() {
-        return Build.FINGERPRINT.startsWith("generic")
-                || Build.FINGERPRINT.startsWith("unknown")
-                || Build.MODEL.contains("google_sdk")
-                || Build.MODEL.contains("Emulator")
-                || Build.MODEL.contains("Android SDK built for x86")
-                || Build.MANUFACTURER.contains("Genymotion")
-                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-                || "google_sdk".equals(Build.PRODUCT);
-    }
-
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate()");
-        mEmulated = isEmulator();
-        setContentView(mEmulated ? R.layout.emulator_main_activity: R.layout.activity_main);
+        setContentView(R.layout.activity_main);
 
         mOrientationEventListener = new MyOrientationEventListener(this);
 
@@ -343,24 +305,8 @@ public class MainActivity extends AppCompatActivity implements
      * Associates view variables with their layout counterparts.
      */
     private void setUpCameraViews() {
-        if (!mEmulated) {
-            mCamera = (CameraView) findViewById(R.id.camera);
-            mCamera.addCallback(mCameraCallback);
-        } else {
-            Log.w(TAG, "Emulator display. Remove before release.");
-            mEmulatorPreview = (ImageView) findViewById(R.id.emulator_image);
-
-            Log.d(TAG, "Loading Image into mEmulatorPreview");
-            GlideApp.with(this).load(R.raw.tester_pic_remove_on_release).into(mEmulatorPreview);
-
-            Log.d(TAG, "Loading Image into Bitmap");
-            GlideApp.with(this).asBitmap().load(R.raw.tester_pic_remove_on_release).into(new SimpleTarget<Bitmap>() {
-                @Override
-                public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                    mEmulatorImage = resource;
-                }
-            });
-        }
+        mCamera = (CameraView) findViewById(R.id.camera);
+        mCamera.addCallback(mCameraCallback);
 
         mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
         mShutterButton.setOnClickListener(mOnClickListener);
