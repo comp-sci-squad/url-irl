@@ -8,6 +8,6 @@
         android:title="@string/action_settings"
         android:icon="@android:drawable/ic_menu_share"
         app:showAsAction="ifRoom"
-        android:actionProviderClass=
-            "android.widget.ShareActionProvider"/>
+        app:actionProviderClass=
+            "androidx.appcompat.widget.ShareActionProvider"/>
 </menu>

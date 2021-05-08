@@ -1,15 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 30
     defaultConfig {
         applicationId "comp_sci_squad.com.github.url_irl"
         minSdkVersion 23
-        targetSdkVersion 25
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
         release {
@@ -22,28 +21,28 @@ android {
 }
 
 repositories {
+    google()
     mavenCentral()
     maven { url 'https://maven.google.com' }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.github.google:cameraview:3eaeac09a7'
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.google.android.gms:play-services-vision:10.2.6'
-    compile 'com.android.support:design:25.3.1'
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:recyclerview-v7:25.3.1'
-    compile 'com.android.support:support-v4:25.3.1'
-    compile 'com.github.bumptech.glide:glide:4.1.1'
+    implementation 'com.github.google:cameraview:3eaeac09a7'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'com.google.android.gms:play-services-vision:10.2.6'
+    implementation 'com.google.android.material:material:1.0.0'
+    testImplementation 'junit:junit:4.12'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.github.bumptech.glide:glide:4.1.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
-    compile 'com.android.support:cardview-v7:25.3.1'
+    implementation 'androidx.cardview:cardview:1.0.0'
 }
-
 
 /*
 compile fileTree(include: ['*.jar'], dir: 'libs')

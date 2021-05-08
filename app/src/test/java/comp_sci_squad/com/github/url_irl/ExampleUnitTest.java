@@ -1,6 +1,6 @@
 package comp_sci_squad.com.github.url_irl;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.*;
 

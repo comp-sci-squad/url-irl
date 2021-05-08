@@ -5,8 +5,8 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowBackground">@color/colorBackground</item>
-        <item name="android:toolbarStyle">@style/Base.Widget.AppCompat.Toolbar</item>
-        <item name="android:titleTextColor">@android:color/white</item>
+        <item name="toolbarStyle">@style/Base.Widget.AppCompat.Toolbar</item>
+        <item name="titleTextColor">@android:color/white</item>
     </style>
 
     <style name="AppTheme.TransparentToolbar" parent="AppTheme">
@@ -16,22 +16,22 @@
     <style name="AppTheme.ToolBarStyle">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
-        <item name="android:background">?attr/colorPrimary</item>
-        <item name="android:elevation">@dimen/toolbar_elevation</item>
-        <item name="android:theme">@style/ThemeOverlay.AppCompat.ActionBar</item>
-        <item name="android:popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="background">?attr/colorPrimary</item>
+        <item name="elevation">@dimen/toolbar_elevation</item>
+        <item name="theme">@style/ThemeOverlay.AppCompat.ActionBar</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
         <item name="titleTextColor">@android:color/white</item>
     </style>
 
     <style name="AppTheme.ToolBarStyle.Transparent" parent="AppTheme.ToolBarStyle">
-        <item name="android:background">@android:color/transparent</item>
+        <item name="background">@android:color/transparent</item>
     </style>
 
     <style name="AppTheme.UrlButtonStyle" parent="TextAppearance.AppCompat.Body1">
         <item name="android:textSize">12sp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/button_selector</item>
+        <item name="background">@drawable/button_selector</item>
         <item name="android:drawableTint">@color/colorPrimaryLight</item>
         <item name="android:drawablePadding">2dp</item>
         <item name="android:layout_marginLeft">36dp</item>
