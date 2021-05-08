@@ -3,10 +3,6 @@ package comp_sci_squad.com.github.url_irl.utilities;
 import java.text.DateFormat;
 import java.util.Date;
 
-/**
- * Created by HBTechnoDude on 8/29/2017.
- */
-
 public class FormattingUtils {
     /**
      * Creates a formatted time stamp.

@@ -6,10 +6,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import comp_sci_squad.com.github.url_irl.data.URLDatabaseContract.*;
 
-/**
- * Created by rraym on 8/16/2017.
- */
-
 public class URLDbHelper extends SQLiteOpenHelper {
     //Name of local file that will store our data
     private static final String DATABASE_NAME = "urlList.db";

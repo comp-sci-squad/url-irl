@@ -11,7 +11,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.ShareActionProvider;
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -24,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.common.collect.Iterables;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -45,9 +45,6 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
      * UI Elements
      */
     private ProgressBar mLoadingIndicator;
-    private ImageView mImageView;
-    private Toolbar mToolBar;
-    private TextView mTimestamp;
 
     /**
      * Intent Extras
@@ -60,12 +57,10 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
      * Data Storage Elements
      */
     private UriAdapter mAdapter;
-    private RecyclerView recyclerView;
 
     /**
      * Sharing
      */
-    private ShareActionProvider mShareActionProvider;
     private Intent mShareIntent;
 
     @Override
@@ -87,17 +82,20 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
         //Set UI member variables and data storage elements
         Log.d(TAG, "Assigning Member variables");
-        mToolBar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar mToolBar = (Toolbar) findViewById(R.id.toolbar);
         mToolBar.setTitle(getString(R.string.title_activity_list_urls));
         setSupportActionBar(mToolBar);
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
-        recyclerView = (RecyclerView) findViewById(R.id.rv_id);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+        }
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_id);
         mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
-        mTimestamp = (TextView) findViewById(R.id.timestamp);
+        TextView mTimestamp = (TextView) findViewById(R.id.timestamp);
         mTimestamp.setText(FormattingUtils.formatTimeStamp(mTimePictureTaken));
-        mImageView = (ImageView) findViewById(R.id.image_thumbnail);
+        ImageView mImageView = (ImageView) findViewById(R.id.image_thumbnail);
         GlideApp.with(this).
                 load(mURLScanThumbnail).
                 diskCacheStrategy(DiskCacheStrategy.NONE).
@@ -114,8 +112,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         //Converts arraylist<string> to var args and runs the async task
         Log.d(TAG, "Starting UrlParseTask");
 
-        new UrlParseTask().execute(mStringBlocks.toArray(new String[mStringBlocks.size()]));
-
+        new UrlParseTask().execute(Iterables.toArray(mStringBlocks, String.class));
     }
 
     /**
@@ -143,21 +140,15 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "Options Item Selected");
-        switch (item.getItemId()) {
-            case R.id.share_all:
-                // Share the URLS
-                if (mShareIntent != null)
-                    startActivity(Intent.createChooser(mShareIntent, "Share using"));
-                else
-                    Log.e(TAG, "Share intent was null");
-                return true;
-
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-
-        }
+        if (item.getItemId() == R.id.share_all) {// Share the URLS
+            if (mShareIntent != null)
+                startActivity(Intent.createChooser(mShareIntent, "Share using"));
+            else
+                Log.e(TAG, "Share intent was null");
+            return true;
+        }// If we got here, the user's action was not recognized.
+        // Invoke the superclass to handle it.
+        return super.onOptionsItemSelected(item);
     }
 
     public static Intent newIntent(Context packageContext, ArrayList<String> stringListExtra, byte[] thumbnailExtra, long timePictureTakenExtra) {
@@ -282,12 +273,14 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
         protected void onPostExecute(ArrayList<Uri> urls) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             // Share intent
-            String shareString = "";
-            for (Uri uri : urls)
-                shareString += uri.toString() + "\n";
+            StringBuilder shareString = new StringBuilder();
+            for (Uri uri : urls) {
+                shareString.append(uri.toString());
+                shareString.append("\n");
+            }
             mShareIntent = new Intent();
             mShareIntent.setAction(Intent.ACTION_SEND);
-            mShareIntent.putExtra(Intent.EXTRA_TEXT, shareString);
+            mShareIntent.putExtra(Intent.EXTRA_TEXT, shareString.toString());
             mShareIntent.setType("text/plain");
 
             Toast.makeText(getApplicationContext(), "Loaded " + urls.size() + " URLS", Toast.LENGTH_SHORT).show();

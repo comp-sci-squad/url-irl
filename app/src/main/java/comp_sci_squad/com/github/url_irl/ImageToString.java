@@ -14,11 +14,6 @@ import com.google.android.gms.vision.text.TextRecognizer;
 
 import java.util.ArrayList;
 
-/**
- * Created by brentfred on 6/4/17.
- * Edited by Kevin on 6/25/17
- */
-
 public class ImageToString {
     private static final String TAG = "ImageToString";
 
@@ -44,8 +39,8 @@ public class ImageToString {
         if (!textRecognizer.isOperational()) {
             // Check for low storage.  If there is low storage, the native library will not be
             // downloaded, so detection will not become operational.
-            IntentFilter lowstorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
-            boolean hasLowStorage = context.registerReceiver(null, lowstorageFilter) != null;
+            IntentFilter lowStorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
+            boolean hasLowStorage = context.registerReceiver(null, lowStorageFilter) != null;
 
             if (hasLowStorage) {
                 Toast.makeText(context, R.string.low_storage_error, Toast.LENGTH_LONG).show();
@@ -65,12 +60,10 @@ public class ImageToString {
      */
     private static ArrayList<String> getStrings(SparseArray<TextBlock> tester) {
         ArrayList<String> inputString = new ArrayList<>();
-
-        Log.d(TAG, "Strings found:");
         for (int i = 0; i < tester.size(); i++) {
-            Log.d(TAG, tester.valueAt(i).getValue());
             inputString.add(tester.valueAt(i).getValue());
         }
+        Log.d(TAG, String.format("Strings found: %s", inputString));
         return inputString;
     }
 }

@@ -2,6 +2,8 @@ package comp_sci_squad.com.github.url_irl;
 
 import android.content.Context;
 import android.net.Uri;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,10 +11,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-
-/**
- * Created by matt on 6/25/17.
- */
 
 public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
 
@@ -40,14 +38,14 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
     /**
      * Gets the URL at a given position in the adapter/recycler view.
      * @param position - The position in the adapter.
-     * @return - The requeted URL.
+     * @return - The requested URL.
      */
     public Uri getUri(int position) {
         return mURIArray.get(position);
     }
 
     /**
-     * Creates a viewholder for an instance of the layout content_list_urls.
+     * Creates a view holder for an instance of the layout content_list_urls.
      * Caches the view inside of it.
      * Allows for the recycler view to reuse view holders saving memory.
      *
@@ -55,17 +53,13 @@ public class UriAdapter extends RecyclerView.Adapter<UriAdapter.UriViewHolder>{
      * @param viewType - The view type of the new View.
      * @return - A new ViewHolder that holds a View of the given view type.
      */
+    @NonNull
     @Override
     public UriViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-
         Context context = viewGroup.getContext();
         int layoutIdForListItem = R.layout.content_list_urls;
         LayoutInflater inflater = LayoutInflater.from(context);
-        boolean shouldAttachToParentImmediately = false;
-
-        View view = inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately);
-
-        return new UriViewHolder(view);
+        return new UriViewHolder(inflater.inflate(layoutIdForListItem, viewGroup, false));
     }
 
     /**

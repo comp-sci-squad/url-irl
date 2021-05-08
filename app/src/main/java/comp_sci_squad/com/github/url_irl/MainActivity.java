@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Logging Tag
      */
-    private String TAG = "CAMERA_ACTIVITY";
+    private final String TAG = "CAMERA_ACTIVITY";
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Callback for Camera View
      */
-    private CameraView.Callback mCameraCallback =
+    private final CameraView.Callback mCameraCallback =
             new CameraView.Callback() {
                 @Override
                 public void onCameraOpened(CameraView cameraView) {
@@ -152,8 +152,8 @@ public class MainActivity extends AppCompatActivity implements
      * This class parses images into text and starts ListUrlsActivity when done.
      */
     protected class TextRecognitionTask extends AsyncTask<Bitmap, Integer, ArrayList<String>> {
-        private Context mContext;
-        private long mTimeImageTaken;
+        private final Context mContext;
+        private final long mTimeImageTaken;
         private byte[] mThumbnail;
 
         /**
@@ -184,9 +184,8 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         protected ArrayList<String> doInBackground(Bitmap... params) {
             Log.d(TAG, "URL Parsing Task Started");
-            ArrayList<String> result = new ArrayList<>();
 
-            result.addAll(ImageToString.getTextFromPage(mContext, params[0]));
+            ArrayList<String> result = new ArrayList<>(ImageToString.getTextFromPage(mContext, params[0]));
             Log.d(TAG, "Converted image to text: ");
 
             mThumbnail = compressBitmap(params[0]);
@@ -214,33 +213,31 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Log.d(TAG, "Shutter Button Pressed");
 
-            switch (v.getId()) {
-                case R.id.shutter_button:
-                    if (mCamera != null || mEmulatorPreview != null) {
-                        mShutterButton.setEnabled(false);
+            if (v.getId() == R.id.shutter_button) {
+                if (mCamera != null || mEmulatorPreview != null) {
+                    mShutterButton.setEnabled(false);
 
-                        if (mEmulated)
-                            GlideApp.with(MainActivity.this).load(R.raw.tester_pic_remove_on_release).into(mCapturedImagePreview);
-                        else
-                            mCamera.takePicture();
+                    if (mEmulated)
+                        GlideApp.with(MainActivity.this).load(R.raw.tester_pic_remove_on_release).into(mCapturedImagePreview);
+                    else
+                        mCamera.takePicture();
 
-                        mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
+                    mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
 
-                        if (mEmulated) {
-                            TextRecognitionTask parsingTask = new TextRecognitionTask(
-                                    MainActivity.this, System.currentTimeMillis());
-                            parsingTask.execute(mEmulatorImage);
-                        }
-
-                    } else {
-                        Log.e(TAG, "Camera not instantiated.");
+                    if (mEmulated) {
+                        TextRecognitionTask parsingTask = new TextRecognitionTask(
+                                MainActivity.this, System.currentTimeMillis());
+                        parsingTask.execute(mEmulatorImage);
                     }
-                    break;
+
+                } else {
+                    Log.e(TAG, "Camera not instantiated.");
+                }
             }
         }
     };
@@ -262,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (diff > 55) {
             int newOrientation = Math.round(orientation/90.0f) % 4;
-            float newRotation = 0;
+            float newRotation;
 
             //Rotate animation forward, backward, or 180 depending on change in Orientation
             if (newOrientation == (mLastOrientation + 1) % 4) {
@@ -458,18 +455,16 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_CAMERA_PERMISSION:
-                Log.d(TAG, "Permissions Result for Camera");
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "Request Successful");
-                    setUpCameraViews();
-                } else {
-                    Log.d(TAG, "Permission for camera denied");
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-                }
-                break;
+        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            Log.d(TAG, "Permissions Result for Camera");
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Request Successful");
+                setUpCameraViews();
+            } else {
+                Log.d(TAG, "Permission for camera denied");
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+            }
         }
     }
 
@@ -478,7 +473,7 @@ public class MainActivity extends AppCompatActivity implements
      * The bitmap pool isn't correctly used but most likely isn't needed because of the size of the bitmaps involved.
      */
     private class RotateTransformation extends BitmapTransformation {
-        private float mRotationAngle = 0.0f;
+        private final float mRotationAngle;
         private static final String BASE_ID = "comp_sci_squad.com.github.url_irl.MainActivity.RotateTransformation";
 
         /**
@@ -498,8 +493,7 @@ public class MainActivity extends AppCompatActivity implements
 
             Matrix rotationMatrix = new Matrix();
             rotationMatrix.postRotate(mRotationAngle);
-            Bitmap rotatedBitmap = Bitmap.createBitmap(toTransform, 0, 0, toTransform.getWidth(), toTransform.getHeight(), rotationMatrix, true);
-            return rotatedBitmap;
+            return Bitmap.createBitmap(toTransform, 0, 0, toTransform.getWidth(), toTransform.getHeight(), rotationMatrix, true);
          }
 
         @Override
