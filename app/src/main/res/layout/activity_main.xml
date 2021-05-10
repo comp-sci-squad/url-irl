@@ -16,7 +16,7 @@
         app:layout_constraintLeft_toLeftOf="parent" >
     </androidx.appcompat.widget.Toolbar >
 
-    <com.google.android.cameraview.CameraView
+    <androidx.camera.view.PreviewView
         android:id="@+id/camera"
         android:layout_width="0dp"
         android:layout_height="0dp"
