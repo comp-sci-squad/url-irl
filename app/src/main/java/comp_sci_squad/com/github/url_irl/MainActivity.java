@@ -28,13 +28,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageProxy;
 import androidx.camera.core.TorchState;
 import androidx.camera.view.LifecycleCameraController;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
@@ -42,14 +41,9 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -69,20 +63,19 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * UI Elements
      */
-//    CameraView mCamera;
     LifecycleCameraController mCamera;
-    //    ProcessCameraProvider processCameraProvider;
     PreviewView mPreview;
     ImageButton mShutterButton;
     ProgressBar mProgressBar;
     MediaActionSound mShutterSound;
     ImageView mCapturedImagePreview;
     Toolbar mToolBar;
+
     /**
      * Emulator Variables. Remove before release.
      */
     ImageView mEmulatorPreview;
-    private ExecutorService cameraExecutor;
+
     /**
      * Orientation Private Variables
      * <p>
@@ -91,49 +84,6 @@ public class MainActivity extends AppCompatActivity implements
      */
     private MyOrientationEventListener mOrientationEventListener;
     private int mLastOrientation = 0;
-    ImageCapture.OnImageCapturedCallback callback = new ImageCapture.OnImageCapturedCallback() {
-        @Override
-        public void onCaptureSuccess(@NonNull @NotNull ImageProxy image) {
-            super.onCaptureSuccess(image);
-            Log.d(TAG, "Picture taken");
-            final long timeImageTaken = System.currentTimeMillis();
-
-            Log.d(TAG, "Getting picture Dimensions");
-            BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-            bitmapOptions.inJustDecodeBounds = true;
-            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-            buffer.rewind();
-            byte[] bytes = new byte[buffer.capacity()];
-            buffer.get(bytes);
-//            byte[] clonedBytes = bytes.clone();
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.length, bitmapOptions);
-            int originalImageWidth = bitmapOptions.outWidth;
-            int originalImageHeight = bitmapOptions.outHeight;
-
-            Log.d(TAG, "Byte Array Size: " + bytes.length);
-            Log.d(TAG, "ImageWidth: " + originalImageWidth);
-            Log.d(TAG, "ImageHeight: " + originalImageHeight);
-
-            int inSampleSize = getInSampleSize(originalImageWidth, originalImageHeight);
-
-            final int newImageWidth = originalImageWidth / inSampleSize;
-            final int newImageHeight = originalImageHeight / inSampleSize;
-
-            //Rotate Options
-            final RequestOptions options = new RequestOptions();
-            if (mLastOrientation != 0)
-                options.transform(new RotateTransformation(90.0f * mLastOrientation));
-
-            //Load parsing bitmap
-//            GlideApp.with(MainActivity.this).asBitmap().load(bytes).override(newImageWidth, newImageHeight).apply(options).into(new SimpleTarget<Bitmap>() {
-//                @Override
-//                public void onResourceReady(Bitmap image, Transition<? super Bitmap> transition) {
-//                    TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this, timeImageTaken);
-//                    parsingTask.execute(image);
-//                }
-//            });
-        }
-    };
     private float mLastRotation = 0.0f;
     private Bitmap mEmulatorImage;
     private boolean mEmulated;
@@ -149,17 +99,50 @@ public class MainActivity extends AppCompatActivity implements
                     if (mEmulated) {
                         GlideApp.with(MainActivity.this).load(R.raw.tester_pic_remove_on_release).into(mCapturedImagePreview);
                     } else {
-                        mCamera.takePicture(cameraExecutor, callback);
-                        GlideApp.with(MainActivity.this).asBitmap().load(mPreview.getBitmap()).into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(Bitmap image, Transition<? super Bitmap> transition) {
-                                TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this, 100);
-                                parsingTask.execute(image);
-                            }
-                        });
+                        // TODO: Offload most of this work off the MainThread asynchronously
+                        Log.d(TAG, "Picture taken");
+                        final long timeImageTaken = System.currentTimeMillis();
+
+                        Log.d(TAG, "Getting picture Dimensions");
+                        Bitmap bmp = mPreview.getBitmap();
+                        if (bmp == null) {
+                            Log.e(TAG, "Preview Image Bitmap is null");
+                            return;
+                        }
+                        bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] bytes = stream.toByteArray();
+                        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+                        bitmapOptions.inJustDecodeBounds = true;
+                        BitmapFactory.decodeByteArray(bytes, 0, bytes.length, bitmapOptions);
+                        int originalImageWidth = bitmapOptions.outWidth;
+                        int originalImageHeight = bitmapOptions.outHeight;
+
+                        Log.d(TAG, "Byte Array Size: " + bytes.length);
+                        Log.d(TAG, "ImageWidth: " + originalImageWidth);
+                        Log.d(TAG, "ImageHeight: " + originalImageHeight);
+
+                        int inSampleSize = getInSampleSize(originalImageWidth, originalImageHeight);
+
+                        final int newImageWidth = originalImageWidth / inSampleSize;
+                        final int newImageHeight = originalImageHeight / inSampleSize;
+
+                        //Rotate Options
+                        final RequestOptions options = new RequestOptions();
+                        if (mLastOrientation != 0)
+                            options.transform(new RotateTransformation(90.0f * mLastOrientation));
+
+                        //Load parsing bitmap
+                        GlideApp.with(MainActivity.this).asBitmap().load(bytes).override(newImageWidth, newImageHeight).apply(options)
+                                .into(new SimpleTarget<Bitmap>() {
+                                    @Override
+                                    public void onResourceReady(Bitmap image, Transition<? super Bitmap> transition) {
+                                        TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this, timeImageTaken);
+                                        parsingTask.execute(image);
+                                    }
+                                });
                     }
 
-//                    mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
+                    mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
 
                     if (mEmulated) {
                         TextRecognitionTask parsingTask = new TextRecognitionTask(
@@ -293,7 +276,6 @@ public class MainActivity extends AppCompatActivity implements
             });
         }
 
-        cameraExecutor = Executors.newSingleThreadExecutor();
         mShutterButton = findViewById(R.id.shutter_button);
         mShutterButton.setOnClickListener(mOnClickListener);
 
@@ -332,7 +314,12 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "Options Item Selected");
         if (item.getItemId() == R.id.torch_menu_item) {
-            if (mCamera.getTorchState().getValue() == TorchState.ON) {
+            Integer torchState = mCamera.getTorchState().getValue();
+            if (torchState == null) {
+                Log.e(TAG,"Torch state is null");
+                return false;
+            }
+            else if (torchState == TorchState.ON) {
                 Log.d(TAG, "Disabling Torch");
                 mCamera.enableTorch(false);
             } else {
@@ -354,8 +341,6 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             Log.d(TAG, "Orientation Event Listener cannot detect orientation");
         }
-//        if (mCamera != null)
-//            mCamera.();
         Log.d(TAG, "Camera Resumed");
 
         Toast.makeText(this, R.string.camera_prompt, Toast.LENGTH_LONG).show();
@@ -365,10 +350,9 @@ public class MainActivity extends AppCompatActivity implements
     protected void onPause() {
         Log.d(TAG, "onPause()");
         mOrientationEventListener.disable();
-//        if (mCamera != null) {
-//            mCamera.setFlash(CameraView.FLASH_OFF);
-//            mCamera.stop();
-//        }
+        if (mCamera != null) {
+            mCamera.enableTorch(false);
+        }
         Log.d(TAG, "Camera Paused");
         super.onPause();
     }
