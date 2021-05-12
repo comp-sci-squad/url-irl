@@ -33,7 +33,6 @@ import androidx.camera.view.LifecycleCameraController;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.LiveData;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
@@ -97,7 +96,8 @@ public class MainActivity extends AppCompatActivity implements
                     mShutterButton.setEnabled(false);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     if (mEmulated) {
-                        GlideApp.with(MainActivity.this).load(R.raw.tester_pic_remove_on_release).into(mCapturedImagePreview);
+                        GlideApp.with(MainActivity.this).load(R.raw.tester_pic_remove_on_release)
+                            .into(mCapturedImagePreview);
                     } else {
                         // TODO: Offload most of this work off the MainThread asynchronously
                         Log.d(TAG, "Picture taken");
@@ -132,24 +132,25 @@ public class MainActivity extends AppCompatActivity implements
                             options.transform(new RotateTransformation(90.0f * mLastOrientation));
 
                         //Load parsing bitmap
-                        GlideApp.with(MainActivity.this).asBitmap().load(bytes).override(newImageWidth, newImageHeight).apply(options)
-                                .into(new SimpleTarget<Bitmap>() {
-                                    @Override
-                                    public void onResourceReady(Bitmap image, Transition<? super Bitmap> transition) {
-                                        TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this, timeImageTaken);
-                                        parsingTask.execute(image);
-                                    }
-                                });
+                        GlideApp.with(MainActivity.this).asBitmap().load(bytes)
+                            .override(newImageWidth, newImageHeight).apply(options)
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(Bitmap image,
+                                    Transition<? super Bitmap> transition) {
+                                    TextRecognitionTask parsingTask = new TextRecognitionTask(
+                                        MainActivity.this, timeImageTaken);
+                                    parsingTask.execute(image);
+                                }
+                            });
                     }
-
                     mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
 
                     if (mEmulated) {
                         TextRecognitionTask parsingTask = new TextRecognitionTask(
-                                MainActivity.this, System.currentTimeMillis());
+                            MainActivity.this, System.currentTimeMillis());
                         parsingTask.execute(mEmulatorImage);
                     }
-
                 } else {
                     Log.e(TAG, "Camera not instantiated.");
                 }
@@ -158,27 +159,72 @@ public class MainActivity extends AppCompatActivity implements
     };
 
     /**
-     * Checks if the app is run on an emulator.
-     * <p>
-     * Warning: this and other emulator code should be removed from release
-     * versions of the app, as it is rumored to yield some false positives.
-     *
-     * @return boolean - True if the app is being run on an emulator.
+     * This class parses images into text and starts ListUrlsActivity when done.
      */
-    public static boolean isEmulator() {
-        return Build.FINGERPRINT.startsWith("generic")
-                || Build.FINGERPRINT.startsWith("unknown")
-                || Build.MODEL.contains("google_sdk")
-                || Build.MODEL.contains("Emulator")
-                || Build.MODEL.contains("Android SDK built for x86")
-                || Build.MANUFACTURER.contains("Genymotion")
-                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
-                || "google_sdk".equals(Build.PRODUCT);
+    protected class TextRecognitionTask extends AsyncTask<Bitmap, Integer, ArrayList<String>> {
+        private final Context mContext;
+        private final long mTimeImageTaken;
+        private byte[] mThumbnail;
+
+        /**
+         * Constructor to set extra variables
+         * @param context - The context for creating the new intent.
+         * @param timeImageTaken - The time the image was taken at as a long.
+         */
+        public TextRecognitionTask(Context context, long timeImageTaken) {
+            mContext = context;
+            mTimeImageTaken = timeImageTaken;
+        }
+
+        /**
+         * Enables progress bar on UI thread before task starts.
+         * Called automatically by the AsyncTask.
+         */
+        @Override
+        protected void onPreExecute() {
+            if (!isCancelled())
+                mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        /**
+         * Called automatically by the AsyncTask.
+         * @param params Bitmap varargs array that is going to be parsed for text.
+         * @return ArrayList<String> - Returns the parsed text from the image.
+         */
+        @Override
+        protected ArrayList<String> doInBackground(Bitmap... params) {
+            Log.d(TAG, "URL Parsing Task Started");
+
+            ArrayList<String> result = new ArrayList<>(ImageToString.getTextFromPage(mContext, params[0]));
+            Log.d(TAG, "Converted image to text: ");
+
+            mThumbnail = compressBitmap(params[0]);
+            params[0].recycle();
+            params[0] = null;
+
+            return result;
+        }
+        /**
+         * Resets UI elements before starting ListUrlsActivity.
+         * Called automatically by the AsyncTask.
+         * @param mParsedText - The parsed text from the image.
+         */
+        @Override
+        protected void onPostExecute(ArrayList<String> mParsedText) {
+            Log.d(TAG, "URL Parsing Task Ended.");
+            mProgressBar.setVisibility(View.INVISIBLE);
+            mShutterButton.setEnabled(true);
+            Intent intent = ListURLsActivity.newIntent(mContext, mParsedText, mThumbnail, mTimeImageTaken);
+            startActivity(intent);
+
+            Log.d(TAG, "Resetting Views.");
+            mShutterButton.setEnabled(true);
+        }
     }
 
     /**
      * Calculates the devices current rotation and compares to current orientation and updates UI accordingly.
-     * <p>
+     *
      * If the difference is greater than 55 degrees it calculates new orientation and
      * and creates an animation for the rotation of the UI elements.
      * It then rotates the UI elements with that animation.
@@ -228,6 +274,25 @@ public class MainActivity extends AppCompatActivity implements
             mLastRotation = newRotation;
             Log.d(TAG, "Orientation Changed to: " + newOrientation);
         }
+    }
+
+    /***
+     * Checks if the app is run on an emulator.
+     *
+     * Warning: this and other emulator code should be removed from release
+     * versions of the app, as it is rumored to yield some false positives.
+     *
+     * @return boolean - True if the app is being run on an emulator.
+     */
+    public static boolean isEmulator() {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk".equals(Build.PRODUCT);
     }
 
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -390,6 +455,40 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
+     * Class for GlideApp to Transform bitmaps.
+     * The bitmap pool isn't correctly used but most likely isn't needed because of the size of the bitmaps involved.
+     */
+    private class RotateTransformation extends BitmapTransformation {
+        private final float mRotationAngle;
+        private static final String BASE_ID = "comp_sci_squad.com.github.url_irl.MainActivity.RotateTransformation";
+
+        /**
+         * Constructor for the rotation transformation.
+         * The class is designed to be reused with multiple transformations.
+         * @param rotationAngle - The angle, generally 90, 180, 270
+         */
+        private RotateTransformation(float rotationAngle) {
+            this.mRotationAngle = rotationAngle;
+        }
+
+        @Override
+        protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+            Log.d(TAG, "Transforming Bitmap by degrees: " + mRotationAngle);
+            if (Float.compare(mRotationAngle, 0.0f) == 0)
+                return toTransform;
+
+            Matrix rotationMatrix = new Matrix();
+            rotationMatrix.postRotate(mRotationAngle);
+            return Bitmap.createBitmap(toTransform, 0, 0, toTransform.getWidth(), toTransform.getHeight(), rotationMatrix, true);
+         }
+
+        @Override
+        public void updateDiskCacheKey(MessageDigest messageDigest) {
+            messageDigest.update((BASE_ID + mRotationAngle).getBytes());
+        }
+    }
+
+    /**
      * Compresses a bitmap so its length and width are 1/8 the size
      * Results in a 1/64th size image
      *
@@ -433,109 +532,6 @@ public class MainActivity extends AppCompatActivity implements
 
         Log.d(TAG, "In Sample Size: " + inSampleSize);
         return inSampleSize;
-    }
-
-    /**
-     * This class parses images into text and starts ListUrlsActivity when done.
-     */
-    protected class TextRecognitionTask extends AsyncTask<Bitmap, Integer, ArrayList<String>> {
-        private final Context mContext;
-        private final long mTimeImageTaken;
-        private byte[] mThumbnail;
-
-        /**
-         * Constructor to set extra variables
-         *
-         * @param context        - The context for creating the new intent.
-         * @param timeImageTaken - The time the image was taken at as a long.
-         */
-        public TextRecognitionTask(Context context, long timeImageTaken) {
-            mContext = context;
-            mTimeImageTaken = timeImageTaken;
-        }
-
-        /**
-         * Enables progress bar on UI thread before task starts.
-         * Called automatically by the AsyncTask.
-         */
-        @Override
-        protected void onPreExecute() {
-            if (!isCancelled())
-                mProgressBar.setVisibility(View.VISIBLE);
-        }
-
-        /**
-         * Called automatically by the AsyncTask.
-         *
-         * @param params Bitmap varargs array that is going to be parsed for text.
-         * @return ArrayList<String> - Returns the parsed text from the image.
-         */
-        @Override
-        protected ArrayList<String> doInBackground(Bitmap... params) {
-            Log.d(TAG, "URL Parsing Task Started");
-
-            ArrayList<String> result = new ArrayList<>(ImageToString.getTextFromPage(mContext, params[0]));
-            Log.d(TAG, "Converted image to text: ");
-
-            mThumbnail = compressBitmap(params[0]);
-            params[0].recycle();
-            params[0] = null;
-
-            return result;
-        }
-
-        /**
-         * Resets UI elements before starting ListUrlsActivity.
-         * Called automatically by the AsyncTask.
-         *
-         * @param mParsedText - The parsed text from the image.
-         */
-        @Override
-        protected void onPostExecute(ArrayList<String> mParsedText) {
-            Log.d(TAG, "URL Parsing Task Ended.");
-            mProgressBar.setVisibility(View.INVISIBLE);
-            mShutterButton.setEnabled(true);
-            Intent intent = ListURLsActivity.newIntent(mContext, mParsedText, mThumbnail, mTimeImageTaken);
-            startActivity(intent);
-
-            Log.d(TAG, "Resetting Views.");
-            mShutterButton.setEnabled(true);
-        }
-    }
-
-    /**
-     * Class for GlideApp to Transform bitmaps.
-     * The bitmap pool isn't correctly used but most likely isn't needed because of the size of the bitmaps involved.
-     */
-    private class RotateTransformation extends BitmapTransformation {
-        private static final String BASE_ID = "comp_sci_squad.com.github.url_irl.MainActivity.RotateTransformation";
-        private final float mRotationAngle;
-
-        /**
-         * Constructor for the rotation transformation.
-         * The class is designed to be reused with multiple transformations.
-         *
-         * @param rotationAngle - The angle, generally 90, 180, 270
-         */
-        private RotateTransformation(float rotationAngle) {
-            this.mRotationAngle = rotationAngle;
-        }
-
-        @Override
-        protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
-            Log.d(TAG, "Transforming Bitmap by degrees: " + mRotationAngle);
-            if (Float.compare(mRotationAngle, 0.0f) == 0)
-                return toTransform;
-
-            Matrix rotationMatrix = new Matrix();
-            rotationMatrix.postRotate(mRotationAngle);
-            return Bitmap.createBitmap(toTransform, 0, 0, toTransform.getWidth(), toTransform.getHeight(), rotationMatrix, true);
-        }
-
-        @Override
-        public void updateDiskCacheKey(MessageDigest messageDigest) {
-            messageDigest.update((BASE_ID + mRotationAngle).getBytes());
-        }
     }
 
     /**
