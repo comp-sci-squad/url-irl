@@ -1,5 +1,8 @@
 package comp_sci_squad.com.github.url_irl;
 
+import static comp_sci_squad.com.github.url_irl.MainActivity.PICTURE_EXTRA;
+import static comp_sci_squad.com.github.url_irl.MainActivity.TIME_EXTRA;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -7,11 +10,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,18 +19,17 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.common.collect.Iterables;
-
+import comp_sci_squad.com.github.url_irl.utilities.FormattingUtils;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import comp_sci_squad.com.github.url_irl.utilities.FormattingUtils;
-
-import static comp_sci_squad.com.github.url_irl.MainActivity.PICTURE_EXTRA;
-import static comp_sci_squad.com.github.url_irl.MainActivity.TIME_EXTRA;
 
 public class ListURLsActivity extends AppCompatActivity implements UriAdapter.ListItemClickListener {
 
@@ -82,7 +79,7 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
 
         //Set UI member variables and data storage elements
         Log.d(TAG, "Assigning Member variables");
-        Toolbar mToolBar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar mToolBar = findViewById(R.id.toolbar);
         mToolBar.setTitle(getString(R.string.title_activity_list_urls));
         setSupportActionBar(mToolBar);
         ActionBar actionBar = getSupportActionBar();
@@ -91,16 +88,16 @@ public class ListURLsActivity extends AppCompatActivity implements UriAdapter.Li
             actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
         }
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv_id);
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.loading_indicator);
-        TextView mTimestamp = (TextView) findViewById(R.id.timestamp);
+        RecyclerView recyclerView = findViewById(R.id.rv_id);
+        mLoadingIndicator = findViewById(R.id.loading_indicator);
+        TextView mTimestamp = findViewById(R.id.timestamp);
         mTimestamp.setText(FormattingUtils.formatTimeStamp(mTimePictureTaken));
-        ImageView mImageView = (ImageView) findViewById(R.id.image_thumbnail);
+        ImageView mImageView = findViewById(R.id.image_thumbnail);
         GlideApp.with(this).
-                load(mURLScanThumbnail).
-                diskCacheStrategy(DiskCacheStrategy.NONE).
-                skipMemoryCache(true).
-                into(mImageView);
+            load(mURLScanThumbnail).
+            diskCacheStrategy(DiskCacheStrategy.NONE).
+            skipMemoryCache(true).
+            into(mImageView);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
