@@ -8,14 +8,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.MediaActionSound;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,14 +23,22 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import android.os.AsyncTask;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.camera.core.TorchState;
+import androidx.camera.view.LifecycleCameraController;
+import androidx.camera.view.PreviewView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.android.cameraview.CameraView;
 
 import java.io.ByteArrayOutputStream;
 import java.security.MessageDigest;
@@ -45,24 +48,22 @@ public class MainActivity extends AppCompatActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback {
     /**
      * Extra Name Constants for the ListURLsActivity Intent
-     *
+     * <p>
      * PICTURE_EXTRA labels a byte array
      * TIME_EXTRA labels a long
      */
     public static final String PICTURE_EXTRA = "bitmapBytes";
     public static final String TIME_EXTRA = "time";
-
+    private static final int REQUEST_CAMERA_PERMISSION = 1;
     /**
      * Logging Tag
      */
     private final String TAG = "CAMERA_ACTIVITY";
-
-    private static final int REQUEST_CAMERA_PERMISSION = 1;
-
     /**
      * UI Elements
      */
-    CameraView mCamera;
+    LifecycleCameraController mCamera;
+    PreviewView mPreview;
     ImageButton mShutterButton;
     ProgressBar mProgressBar;
     MediaActionSound mShutterSound;
@@ -70,83 +71,92 @@ public class MainActivity extends AppCompatActivity implements
     Toolbar mToolBar;
 
     /**
+     * Emulator Variables. Remove before release.
+     */
+    ImageView mEmulatorPreview;
+
+    /**
      * Orientation Private Variables
-     *
+     * <p>
      * MyOrientationEventListener extends OrientationEventListener and calls onOrientationChanged()
      * if phone is rotated 55 degrees away from orientation
      */
     private MyOrientationEventListener mOrientationEventListener;
     private int mLastOrientation = 0;
     private float mLastRotation = 0.0f;
-
-    /**
-     * Emulator Variables. Remove before release.
-     */
-    ImageView mEmulatorPreview;
     private Bitmap mEmulatorImage;
     private boolean mEmulated;
+    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG, "Shutter Button Pressed");
 
-    /**
-     * Callback for Camera View
-     */
-    private final CameraView.Callback mCameraCallback =
-            new CameraView.Callback() {
-                @Override
-                public void onCameraOpened(CameraView cameraView) {
-                    super.onCameraOpened(cameraView);
-                    Log.d(TAG, "Camera Opened");
-                }
+            if (v.getId() == R.id.shutter_button) {
+                if (mCamera != null || mEmulatorPreview != null) {
+                    mShutterButton.setEnabled(false);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    if (mEmulated) {
+                        GlideApp.with(MainActivity.this).load(R.raw.tester_pic_remove_on_release)
+                            .into(mCapturedImagePreview);
+                    } else {
+                        // TODO: Offload most of this work off the MainThread asynchronously
+                        Log.d(TAG, "Picture taken");
+                        final long timeImageTaken = System.currentTimeMillis();
 
-                @Override
-                public void onCameraClosed(CameraView cameraView) {
-                    super.onCameraClosed(cameraView);
-                    Log.d(TAG, "Camera Closed");
-                }
-
-                /**
-                 * Loads the image into a byte array with Glide.
-                 * Shrinks the bitmap based on available memory.
-                 * It is parsed for text with an AsyncTask that handles starting the ListURLS activity.
-                 * @param cameraView - A reference to the cameraView the picture was taken with
-                 * @param data - The taken picture as a byte array
-                 */
-                @Override
-                public void onPictureTaken(CameraView cameraView, byte[] data) {
-                    super.onPictureTaken(cameraView, data);
-                    Log.d(TAG, "Picture taken");
-                    final long timeImageTaken = System.currentTimeMillis();
-
-                    Log.d(TAG, "Getting picture Dimensions");
-                    BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-                    bitmapOptions.inJustDecodeBounds = true;
-                    BitmapFactory.decodeByteArray(data, 0, data.length, bitmapOptions);
-                    int originalImageWidth = bitmapOptions.outWidth;
-                    int originalImageHeight = bitmapOptions.outHeight;
-
-                    Log.d(TAG, "Byte Array Size: " + data.length);
-                    Log.d(TAG, "ImageWidth: " + originalImageWidth);
-                    Log.d(TAG, "ImageHeight: " + originalImageHeight);
-
-                    int inSampleSize = getInSampleSize(originalImageWidth, originalImageHeight);
-
-                    final int newImageWidth = originalImageWidth / inSampleSize;
-                    final int newImageHeight = originalImageHeight / inSampleSize;
-
-                    //Rotate Options
-                    final RequestOptions options = new RequestOptions();
-                    if (mLastOrientation != 0)
-                        options.transform(new RotateTransformation(90.0f * mLastOrientation));
-
-                    //Load parsing bitmap
-                    GlideApp.with(MainActivity.this).asBitmap().load(data).override(newImageWidth, newImageHeight).apply(options).into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap image, Transition<? super Bitmap> transition) {
-                            TextRecognitionTask parsingTask = new TextRecognitionTask(MainActivity.this, timeImageTaken);
-                            parsingTask.execute(image);
+                        Log.d(TAG, "Getting picture Dimensions");
+                        Bitmap bmp = mPreview.getBitmap();
+                        if (bmp == null) {
+                            Log.e(TAG, "Preview Image Bitmap is null");
+                            return;
                         }
-                    });
+                        bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] bytes = stream.toByteArray();
+                        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+                        bitmapOptions.inJustDecodeBounds = true;
+                        BitmapFactory.decodeByteArray(bytes, 0, bytes.length, bitmapOptions);
+                        int originalImageWidth = bitmapOptions.outWidth;
+                        int originalImageHeight = bitmapOptions.outHeight;
+
+                        Log.d(TAG, "Byte Array Size: " + bytes.length);
+                        Log.d(TAG, "ImageWidth: " + originalImageWidth);
+                        Log.d(TAG, "ImageHeight: " + originalImageHeight);
+
+                        int inSampleSize = getInSampleSize(originalImageWidth, originalImageHeight);
+
+                        final int newImageWidth = originalImageWidth / inSampleSize;
+                        final int newImageHeight = originalImageHeight / inSampleSize;
+
+                        //Rotate Options
+                        final RequestOptions options = new RequestOptions();
+                        if (mLastOrientation != 0)
+                            options.transform(new RotateTransformation(90.0f * mLastOrientation));
+
+                        //Load parsing bitmap
+                        GlideApp.with(MainActivity.this).asBitmap().load(bytes)
+                            .override(newImageWidth, newImageHeight).apply(options)
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(Bitmap image,
+                                    Transition<? super Bitmap> transition) {
+                                    TextRecognitionTask parsingTask = new TextRecognitionTask(
+                                        MainActivity.this, timeImageTaken);
+                                    parsingTask.execute(image);
+                                }
+                            });
+                    }
+                    mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
+
+                    if (mEmulated) {
+                        TextRecognitionTask parsingTask = new TextRecognitionTask(
+                            MainActivity.this, System.currentTimeMillis());
+                        parsingTask.execute(mEmulatorImage);
+                    }
+                } else {
+                    Log.e(TAG, "Camera not instantiated.");
                 }
-            };
+            }
+        }
+    };
 
     /**
      * This class parses images into text and starts ListUrlsActivity when done.
@@ -194,7 +204,6 @@ public class MainActivity extends AppCompatActivity implements
 
             return result;
         }
-
         /**
          * Resets UI elements before starting ListUrlsActivity.
          * Called automatically by the AsyncTask.
@@ -213,38 +222,9 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Log.d(TAG, "Shutter Button Pressed");
-
-            if (v.getId() == R.id.shutter_button) {
-                if (mCamera != null || mEmulatorPreview != null) {
-                    mShutterButton.setEnabled(false);
-
-                    if (mEmulated)
-                        GlideApp.with(MainActivity.this).load(R.raw.tester_pic_remove_on_release).into(mCapturedImagePreview);
-                    else
-                        mCamera.takePicture();
-
-                    mShutterSound.play(MediaActionSound.SHUTTER_CLICK);
-
-                    if (mEmulated) {
-                        TextRecognitionTask parsingTask = new TextRecognitionTask(
-                                MainActivity.this, System.currentTimeMillis());
-                        parsingTask.execute(mEmulatorImage);
-                    }
-
-                } else {
-                    Log.e(TAG, "Camera not instantiated.");
-                }
-            }
-        }
-    };
-
     /**
      * Calculates the devices current rotation and compares to current orientation and updates UI accordingly.
-     * 
+     *
      * If the difference is greater than 55 degrees it calculates new orientation and
      * and creates an animation for the rotation of the UI elements.
      * It then rotates the UI elements with that animation.
@@ -258,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements
         diff = Math.min(diff, 360 - diff);
 
         if (diff > 55) {
-            int newOrientation = Math.round(orientation/90.0f) % 4;
+            int newOrientation = Math.round(orientation / 90.0f) % 4;
             float newRotation;
 
             //Rotate animation forward, backward, or 180 depending on change in Orientation
@@ -296,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    /**
+    /***
      * Checks if the app is run on an emulator.
      *
      * Warning: this and other emulator code should be removed from release
@@ -319,11 +299,11 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate()");
         mEmulated = isEmulator();
-        setContentView(mEmulated ? R.layout.emulator_main_activity: R.layout.activity_main);
+        setContentView(mEmulated ? R.layout.emulator_main_activity : R.layout.activity_main);
 
         mOrientationEventListener = new MyOrientationEventListener(this);
 
-        mToolBar = (Toolbar) findViewById(R.id.main_activity_toolbar);
+        mToolBar = findViewById(R.id.main_activity_toolbar);
         mToolBar.setTitle(getString(R.string.title_activity_camera_viewer));
         setSupportActionBar(mToolBar);
 
@@ -341,11 +321,13 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void setUpCameraViews() {
         if (!mEmulated) {
-            mCamera = (CameraView) findViewById(R.id.camera);
-            mCamera.addCallback(mCameraCallback);
+            mPreview = findViewById(R.id.camera);
+            mCamera = new LifecycleCameraController(getApplicationContext());
+            mCamera.bindToLifecycle(this);
+            mPreview.setController(mCamera);
         } else {
             Log.w(TAG, "Emulator display. Remove before release.");
-            mEmulatorPreview = (ImageView) findViewById(R.id.emulator_image);
+            mEmulatorPreview = findViewById(R.id.emulator_image);
 
             Log.d(TAG, "Loading Image into mEmulatorPreview");
             GlideApp.with(this).load(R.raw.tester_pic_remove_on_release).into(mEmulatorPreview);
@@ -359,21 +341,21 @@ public class MainActivity extends AppCompatActivity implements
             });
         }
 
-        mShutterButton = (ImageButton) findViewById(R.id.shutter_button);
+        mShutterButton = findViewById(R.id.shutter_button);
         mShutterButton.setOnClickListener(mOnClickListener);
 
-        mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
+        mProgressBar = findViewById(R.id.loading_indicator);
 
         mShutterSound = new MediaActionSound();
         mShutterSound.load(MediaActionSound.FOCUS_COMPLETE);
 
-        mCapturedImagePreview = (ImageView) findViewById(R.id.image_preview);
+        mCapturedImagePreview = findViewById(R.id.image_preview);
     }
-
 
     /**
      * Create an options menu. It will create
-     *  - Torchlight button
+     * - Torchlight button
+     *
      * @param menu - The Options Menu being created.
      * @return - True because it handled the menu creation.
      */
@@ -389,6 +371,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Handles menu items being selected.
      * If the item was share_all, start the share chooser with all the urls.
+     *
      * @param item - The item selected.
      * @return - Returns true if successfully handled or calls super method.
      */
@@ -396,12 +379,17 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "Options Item Selected");
         if (item.getItemId() == R.id.torch_menu_item) {
-            if (mCamera.getFlash() == CameraView.FLASH_TORCH) {
+            Integer torchState = mCamera.getTorchState().getValue();
+            if (torchState == null) {
+                Log.e(TAG,"Torch state is null");
+                return false;
+            }
+            else if (torchState == TorchState.ON) {
                 Log.d(TAG, "Disabling Torch");
-                mCamera.setFlash(CameraView.FLASH_OFF);
+                mCamera.enableTorch(false);
             } else {
                 Log.d(TAG, "Enabling Torch");
-                mCamera.setFlash(CameraView.FLASH_TORCH);
+                mCamera.enableTorch(true);
             }
             return true;
         } else
@@ -418,8 +406,6 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             Log.d(TAG, "Orientation Event Listener cannot detect orientation");
         }
-        if (mCamera != null)
-            mCamera.start();
         Log.d(TAG, "Camera Resumed");
 
         Toast.makeText(this, R.string.camera_prompt, Toast.LENGTH_LONG).show();
@@ -430,8 +416,7 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "onPause()");
         mOrientationEventListener.disable();
         if (mCamera != null) {
-            mCamera.setFlash(CameraView.FLASH_OFF);
-            mCamera.stop();
+            mCamera.enableTorch(false);
         }
         Log.d(TAG, "Camera Paused");
         super.onPause();
@@ -448,8 +433,9 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Keeps requesting camera permission til accepted.
      * Once accepted, initialize the Camera View
-     * @param requestCode - The request code for permission. Only acts if its REQUEST_CAMERA_PERMISSION
-     * @param permissions - The requested permissions. Never null.
+     *
+     * @param requestCode  - The request code for permission. Only acts if its REQUEST_CAMERA_PERMISSION
+     * @param permissions  - The requested permissions. Never null.
      * @param grantResults - The grant results for the corresponding permissions which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
      */
     @Override
@@ -511,8 +497,8 @@ public class MainActivity extends AppCompatActivity implements
      */
     private byte[] compressBitmap(Bitmap image) {
         Log.d(TAG, "Compressing thumbnail Bitmap");
-        int thumbnailHeight = image.getHeight()/getResources().getInteger(R.integer.THUMBNAIL_SHRINK_RATIO);
-        int thumbnailWidth = image.getWidth()/getResources().getInteger(R.integer.THUMBNAIL_SHRINK_RATIO);
+        int thumbnailHeight = image.getHeight() / getResources().getInteger(R.integer.THUMBNAIL_SHRINK_RATIO);
+        int thumbnailWidth = image.getWidth() / getResources().getInteger(R.integer.THUMBNAIL_SHRINK_RATIO);
 
         Bitmap scaled = Bitmap.createScaledBitmap(image, thumbnailWidth, thumbnailHeight, true);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -525,7 +511,8 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Calculates the power of 2 the bitmap size must be reduced by to fit within the curent JVM Heap.
      * Assumes there will be other allocations and that 2 bitmaps of the size will be allocated.
-     * @param width - current width of the image.
+     *
+     * @param width  - current width of the image.
      * @param height - current height of the image.
      * @return The power of 2 the image is to be shrunken by.
      */

@@ -16,16 +16,13 @@
         app:layout_constraintLeft_toLeftOf="parent" >
     </androidx.appcompat.widget.Toolbar >
 
-    <com.google.android.cameraview.CameraView
+    <androidx.camera.view.PreviewView
         android:id="@+id/camera"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="visible"
         android:keepScreenOn="true"
         android:adjustViewBounds="true"
-        app:autoFocus="true"
-        app:aspectRatio="4:3"
-        app:facing="back"
         app:flash="off"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
