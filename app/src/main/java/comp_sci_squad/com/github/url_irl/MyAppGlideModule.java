@@ -7,4 +7,6 @@ import com.bumptech.glide.module.AppGlideModule;
  * Glide Module needed for Annotation Processor and a few Glide features
  */
 @GlideModule
-public final class MyAppGlideModule extends AppGlideModule {}
+public final class MyAppGlideModule extends AppGlideModule {
+
+}

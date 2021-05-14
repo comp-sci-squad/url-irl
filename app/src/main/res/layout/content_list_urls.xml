@@ -33,24 +33,24 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintHorizontal_bias="0.0" />
 
-        <TextView
-            android:id="@+id/text_view_share_button"
-            android:text="@string/share_label"
-            android:drawableTop="@android:drawable/ic_menu_share"
-            style="@style/AppTheme.UrlButtonStyle"
-            app:layout_constraintRight_toLeftOf="@+id/text_view_search_button"
-            app:layout_constraintTop_toBottomOf="@+id/textViewUrl"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+      <TextView
+          android:id="@+id/text_view_share_button"
+          style="@style/AppTheme.UrlButtonStyle"
+          android:text="@string/share_label"
+          app:drawableTopCompat="@android:drawable/ic_menu_share"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintRight_toLeftOf="@+id/text_view_search_button"
+          app:layout_constraintTop_toBottomOf="@+id/textViewUrl" />
 
 
-        <TextView
-            android:id="@+id/text_view_search_button"
-            android:text="@string/search_label"
-            android:drawableTop="@android:drawable/ic_menu_search"
-            style="@style/AppTheme.UrlButtonStyle"
-            app:layout_constraintTop_toBottomOf="@+id/textViewUrl"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+      <TextView
+          android:id="@+id/text_view_search_button"
+          style="@style/AppTheme.UrlButtonStyle"
+          android:text="@string/search_label"
+          app:drawableTopCompat="@android:drawable/ic_menu_search"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintRight_toRightOf="parent"
+          app:layout_constraintTop_toBottomOf="@+id/textViewUrl" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

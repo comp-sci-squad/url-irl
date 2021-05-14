@@ -7,63 +7,62 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
-
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
-
 import java.util.ArrayList;
 
 public class ImageToString {
-    private static final String TAG = "ImageToString";
 
-    /**
-     * Parses an image for text.
-     *
-     * @param context - a context to associate the text recognizer with.
-     * @param bitmap - an image to recognize text from.
-     * @return ArrayList&lt&lt;String&gt; - An arraylist of strings of text from each "block" in
-     * the picture.
-     */
-    public static ArrayList<String> getTextFromPage(Context context, Bitmap bitmap) {
-        Log.d(TAG, "Creating Text Recognizer");
-        TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
+  private static final String TAG = "ImageToString";
 
-        // Create a frame from the bitmap and run text detection on the frame.
-        Log.d(TAG, "Creating frame.");
-        Frame frame = new Frame.Builder().setBitmap(bitmap).build();
+  /**
+   * Parses an image for text.
+   *
+   * @param context - a context to associate the text recognizer with.
+   * @param bitmap - an image to recognize text from.
+   * @return ArrayList&lt&lt;String&gt; - An arraylist of strings of text from each "block" in the
+   * picture.
+   */
+  public static ArrayList<String> getTextFromPage(Context context, Bitmap bitmap) {
+    Log.d(TAG, "Creating Text Recognizer");
+    TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
 
-        Log.d(TAG, "Parsing text");
-        SparseArray<TextBlock> textBlockSparseArray = textRecognizer.detect(frame);
+    // Create a frame from the bitmap and run text detection on the frame.
+    Log.d(TAG, "Creating frame.");
+    Frame frame = new Frame.Builder().setBitmap(bitmap).build();
 
-        if (!textRecognizer.isOperational()) {
-            // Check for low storage.  If there is low storage, the native library will not be
-            // downloaded, so detection will not become operational.
-            IntentFilter lowStorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
-            boolean hasLowStorage = context.registerReceiver(null, lowStorageFilter) != null;
+    Log.d(TAG, "Parsing text");
+    SparseArray<TextBlock> textBlockSparseArray = textRecognizer.detect(frame);
 
-            if (hasLowStorage) {
-                Toast.makeText(context, R.string.low_storage_error, Toast.LENGTH_LONG).show();
-                Log.w(TAG, context.getString(R.string.low_storage_error));
-            }
-        }
+    if (!textRecognizer.isOperational()) {
+      // Check for low storage.  If there is low storage, the native library will not be
+      // downloaded, so detection will not become operational.
+      IntentFilter lowStorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
+      boolean hasLowStorage = context.registerReceiver(null, lowStorageFilter) != null;
 
-        textRecognizer.release();
-        return getStrings(textBlockSparseArray);
+      if (hasLowStorage) {
+        Toast.makeText(context, R.string.low_storage_error, Toast.LENGTH_LONG).show();
+        Log.w(TAG, context.getString(R.string.low_storage_error));
+      }
     }
 
-    /**
-     * Creates an ArrayList of strings from a sparse array of TextBlocks.
-     *
-     * @param tester - A sparse array of detected text from a picture.
-     * @return ArrayList&lt;String&gt; - the text found in the image.
-     */
-    private static ArrayList<String> getStrings(SparseArray<TextBlock> tester) {
-        ArrayList<String> inputString = new ArrayList<>();
-        for (int i = 0; i < tester.size(); i++) {
-            inputString.add(tester.valueAt(i).getValue());
-        }
-        Log.d(TAG, String.format("Strings found: %s", inputString));
-        return inputString;
+    textRecognizer.release();
+    return getStrings(textBlockSparseArray);
+  }
+
+  /**
+   * Creates an ArrayList of strings from a sparse array of TextBlocks.
+   *
+   * @param tester - A sparse array of detected text from a picture.
+   * @return ArrayList&lt;String&gt; - the text found in the image.
+   */
+  private static ArrayList<String> getStrings(SparseArray<TextBlock> tester) {
+    ArrayList<String> inputString = new ArrayList<>();
+    for (int i = 0; i < tester.size(); i++) {
+      inputString.add(tester.valueAt(i).getValue());
     }
+    Log.d(TAG, String.format("Strings found: %s", inputString));
+    return inputString;
+  }
 }
