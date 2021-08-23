@@ -2,7 +2,7 @@
     <!-- App stuff -->
     <string name="app_name">URL_IRL</string>
 
-    <!-- Cameraview Activity -->
+    <!-- PreviewView Activity -->
     <string name="title_activity_camera_viewer">Scan a URL</string>
     <string name="photo_prompt">Take a picture!</string>
     <string name="action_settings">Share all URLs</string>
@@ -23,4 +23,8 @@
     <string name="search_label">Search</string>
     <string name="timestamp_default" translatable="false">Aug 29, 2017 12:17 AM</string>
     <string name="copy_to_clipboard">Copied to Clipboard!</string>
+    <string name="image_preview">Image Preview</string>
+    <string name="shutter_button">Shutter Button</string>
+    <string name="emulator_image">Emulator Image</string>
+    <string name="thumbnail_image">Thumbnail Image</string>
 </resources>
